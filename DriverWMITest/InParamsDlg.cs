@@ -10,29 +10,29 @@ namespace WMI_Test
 {
     public partial class InParamsDlg : Form
     {
-        const String strScannerIDXML = "<scanner><scannerID>10</scannerID></scanner>";
+        const String scannerIDXML = "<scanner><scannerID>10</scannerID></scanner>";
         public String inputVal;
         public DriverWMITestApp formParent;
-
         public InParamsDlg(DriverWMITestApp mainform)
         {
             InitializeComponent();
             formParent = mainform;
 
             inputVal = String.Empty;
-            int selectedIndex = formParent.iSelectedIndex;
+            int selectedIndex = formParent.selectedIndex;
 
-            String[] paramNameType = formParent.strSelectedIndexValue.Split('=');
+            String[] paramNameType = formParent.selectedIndexval.Split('=');
             String sampleVal = String.Empty; ;
            
-            if ("GetDeviceTopology" == formParent.cmbWMIMethodsList.SelectedItem.ToString())
+            if ("GetDeviceTopology" == formParent.comboBoxMethodsDW.SelectedItem.ToString())
             {
+
             }
-            else if ("SwitchHostMode" == formParent.cmbWMIMethodsList.SelectedItem.ToString())
+            else if ("SwitchHostMode" == formParent.comboBoxMethodsDW.SelectedItem.ToString())
             {
                 if ("ScannerIdentity" == paramNameType[0])
                 {
-                    inputVal = strScannerIDXML;
+                    inputVal = scannerIDXML;
                     sampleVal = String.Empty;
                 }
                 else if ("TargetHostMode" == paramNameType[0])
@@ -49,40 +49,44 @@ namespace WMI_Test
                 }
 
             }
-            else if ("GetScannerCapabilityProfile" == formParent.cmbWMIMethodsList.SelectedItem.ToString())
+            else if ("GetScannerCapabilityProfile" == formParent.comboBoxMethodsDW.SelectedItem.ToString())
             {
 
             }
-            else if ("RebootScanner" == formParent.cmbWMIMethodsList.SelectedItem.ToString())
+            else if ("RebootScanner" == formParent.comboBoxMethodsDW.SelectedItem.ToString())
             {
                 if ("ScannerIdentity" == paramNameType[0])
                 {
-                    inputVal = strScannerIDXML;
+                    inputVal = scannerIDXML;
                     sampleVal = String.Empty;
                 }
+
             }
 
             this.richTextBox1.Text = inputVal;
-            this.labelInParamHelp.Text = formParent.strSelectedIndexValue;
+            this.labelInParamHelp.Text = formParent.selectedIndexval;
             this.labelInParamHelp.Text += "\r\n";
             this.labelInParamHelp.Text += sampleVal;
+
+        
         }
 
-        private void btnAccept_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             try
             {
                 inputVal = this.richTextBox1.Text;
-                int selectedIndex = formParent.iSelectedIndex;
-                String selectedIndexVal = formParent.strSelectedIndexValue;
+                int selectedIndex = formParent.selectedIndex;
+                String selectedIndexVal = formParent.selectedIndexval;
                 formParent.listBoxDW.SelectedItem = null;
                 formParent.inparams[selectedIndex] = inputVal;
                 formParent.listBoxDW.Items.RemoveAt(selectedIndex);
                 formParent.listBoxDW.Items.Insert(selectedIndex, (selectedIndexVal.Split('=')[0] + "=" + inputVal));
+               // formParent.IsDisplay = false;
             }
             catch(Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(ex.Message);
             }
             finally
             {
@@ -90,9 +94,11 @@ namespace WMI_Test
             }
         }
 
-        private void btnClear_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
             this.Close();
         }
+
+        
     }
 }

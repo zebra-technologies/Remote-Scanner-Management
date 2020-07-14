@@ -11,6 +11,7 @@ namespace WMI_Test
         public ManagementScope mgmtScope;
         public ManagementObjectSearcher objSearcher = null;
         public ManagementClass mgmtClass;
+
     }
 
     class ScannerPNPEventHandler

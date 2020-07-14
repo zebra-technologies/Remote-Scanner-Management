@@ -14,9 +14,6 @@
 * EDIT HISTORY:
 *
 ********************************************************************************/
-/*
- * 
- */
 
 using System;
 using System.Drawing;
@@ -120,18 +117,17 @@ namespace WMI_Tester
 
         private StringCollection partCollection = new StringCollection();
         private StringCollection serialCollection = new StringCollection();
-					
+
+        private string strScanCount = "0";						
         private string strPartNumber = "";						
         private string strSerialNumber = "";					
         private string strComputer;								
        
-        private int iScannerCount = 0;
+        private int no_of_Scanners = 0;							
+        private bool blnDiscovered = false;						
         private string strLastModel = "";						
-        enum RetrieveMethod 
-        { 
-            Quickset = 1, 
-            Clone = 2 
-        };
+        enum RetrieveMethod { Quickset = 1, Clone = 2 };
+       
        
         static private frmMain instance;
 
@@ -145,7 +141,7 @@ namespace WMI_Tester
         private ManagementObjectSearcher objSearcher = null;
         private Label label1;  
       
-        bool blsConnected = false;
+        bool blnConnected = false;
 
         // Main Entry point to the Form
         public frmMain()
@@ -821,7 +817,6 @@ namespace WMI_Tester
 
         }
         #endregion
-
         // Main Entry point the Application
         [STAThread]
         static void Main()
@@ -838,7 +833,7 @@ namespace WMI_Tester
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            blsConnected = false;
+            blnConnected = false;
             Cursor.Current = Cursors.WaitCursor;
             ClearAllEx();
 
@@ -858,12 +853,12 @@ namespace WMI_Tester
             }
             catch (Exception)
             {
-                string strErrorMsg = "Failed to connect\r\n\r\nPossible Reasons:\r\n"
+                string errmsg = "Failed to connect\r\n\r\nPossible Reasons:\r\n"
                 + "- Host Name or IP Address may be incorrect\r\n"
                 + "- Currently logged-on user credentials may not be sufficient\r\n"
                 + "- Firewall group policies of remote host may not be configured";
-                string strErrorCap = "Connection Error";
-                MessageBox.Show(strErrorMsg, strErrorCap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                string errcap = "Connection Error";
+                MessageBox.Show(errmsg, errcap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 lblConnStatus.Text = "Not Connected";
                 this.Update();
                 Cursor.Current = Cursors.Arrow;
@@ -902,7 +897,7 @@ namespace WMI_Tester
             if (Init())
             {
                 lblConnStatus.Text = "Connected";
-                blsConnected = true;
+                blnConnected = true;
                 ControlFocus(true, groupBoxDiscover.Name);
             }
             else
@@ -919,17 +914,12 @@ namespace WMI_Tester
             Cursor.Current = Cursors.Arrow;
         }
 
-        /// <summary>
-        /// Discover the devices - event. Inlimentation in Init().
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Discover Button Click Event
+        // Implementation is in the Init() function
         private void btnDiscover_Click(object sender, System.EventArgs e)
         {
-            if (!blsConnected)
-            {
+            if (!blnConnected)
                 return;
-            }
             Discover();
         }
 
@@ -954,7 +944,7 @@ namespace WMI_Tester
             strPartNumber = "";
 
             // Initialize the variables
-            iScannerCount = 0;
+            no_of_Scanners = 0;
             lblDiscoverStatus.Text = "";
                      
             lblExecStatus.Text = "";
@@ -976,10 +966,9 @@ namespace WMI_Tester
             this.Update();
         }
 
-        /// <summary>
-        /// Enumurate the WMI directory and search for WMI Scanners and populate the Scanners list.
-        /// </summary>
-        /// <returns>Return true, if the Scanners discovered without an issue.</returns>
+        //Init() Function
+        //Function used to enumurate the WMI directory and search for WMI Scanners and populate the Scanners
+        //Function is called when the "Discover" Button is clicked
         private bool Init()
         {
             lock (this)
@@ -1013,14 +1002,12 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Discover the devices (scanners).
-        /// </summary>
         private void Discover()
         {
             lock (this)
             {
                 // Reset and setup controls on the form
+                blnDiscovered = false;
                 ClearAll();
                 UpdateDiscoverStatus("Discovering...");
 
@@ -1033,33 +1020,33 @@ namespace WMI_Tester
 
                     // Enumurate the ManagementObjectSearcher and populate the PartNumber 
                     //(Hidden) and Serial Number (Hidden) List Boxes
-                    foreach (ManagementObject mgmtObject in objSearcher.Get())
+                    foreach (ManagementObject mo in objSearcher.Get())
                     {
-                        iScannerCount++;
+                        no_of_Scanners++;
                         // Extract Model number from the Partnumber
-                        string strModelNumber = mgmtObject["PartNumber"].ToString();
-                        if (strModelNumber.IndexOf("-") > 0)
+                        string tempModel = mo["PartNumber"].ToString();
+                        if (tempModel.IndexOf("-") > 0)
                         {
-                            strModelNumber = strModelNumber.Substring(0, strModelNumber.IndexOf("-"));
+                            tempModel = tempModel.Substring(0, tempModel.IndexOf("-"));
                         }
                         else
                         {
-                            if (strModelNumber.Length >= 7)
+                            if (tempModel.Length >= 7)
                             {
-                                strModelNumber = strModelNumber.Substring(0, 7);
+                                tempModel = tempModel.Substring(0, 7);
                             }
                         }
-                        partCollection.Add(mgmtObject["PartNumber"].ToString());
+                        partCollection.Add(mo["PartNumber"].ToString());
 
-                        serialCollection.Add(mgmtObject["SerialNumber"].ToString());
+                        serialCollection.Add(mo["SerialNumber"].ToString());
 
                         // Add Model number to the Model Listbox if it does not already contain the model number
-                        if (cmbModel.Items.Contains(strModelNumber) == false)
+                        if (cmbModel.Items.Contains(tempModel) == false)
                         {
-                            cmbModel.Items.Add(strModelNumber);
+                            cmbModel.Items.Add(tempModel);
                         }
                     }
-                    if (iScannerCount > 0)
+                    if (no_of_Scanners > 0)
                     {
                         strComputer = txtComputer.Text.Trim();
                         cmbModel.Enabled = true;
@@ -1076,17 +1063,15 @@ namespace WMI_Tester
 
                     // Select the first Model. Used to fire the cmdModel_SelectedIndexChanged event to
                     if (cmbModel.Items.Count > 0)
-                    {
                         cmbModel.SelectedIndex = 0;
-                    }
 
-                    if (iScannerCount == 1)
+                    if (no_of_Scanners == 1)
                     {
-                        lblDiscoverStatus.Text = iScannerCount.ToString() + " Scanner Found";
+                        lblDiscoverStatus.Text = no_of_Scanners.ToString() + " Scanner Found";
                     }
-                    else if (iScannerCount > 1)
+                    else if (no_of_Scanners > 1)
                     {
-                        lblDiscoverStatus.Text = iScannerCount.ToString() + " Scanners Found";
+                        lblDiscoverStatus.Text = no_of_Scanners.ToString() + " Scanners Found";
                     }
                     else
                     {
@@ -1101,70 +1086,55 @@ namespace WMI_Tester
                 }
                 Cursor.Current = Cursors.Arrow;
             }
+
         }
 
-        /// <summary>
-        /// Used to clear and populate the the parameter listbox with the parameters applicable to the current method. 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+        // Method Combo Box Index Changed Event
+        // Used to clear and populate the the parameter listbox with the parameters applicable
+        // to the current Method
         private void cmbMethod_SelectedIndexChanged(object sender, System.EventArgs e)
         {
             ClearStatus();
             UpdateParameters();
         }
 
-        /// <summary>
-        /// Execute WMI queries - event.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        //Execute Button Click Event
         private void btnExecute_Click(object sender, System.EventArgs e)
         {
             ClearStatus();
             ExecuteWMI();
         }
 
-        /// <summary>
-        /// Object dispose dracefully before exit the application.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Clean up code executed before the form is closed. objSeacher is disposed prior to exiting
         private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             StopEventListeners();
             if (objSearcher != null)
-            {
                 objSearcher.Dispose();
-            }
             Thread.Sleep(1000);
         }
 
-        /// <summary>
-        /// Property invoke via a button click. Implimentation in QueryProperties().
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Property Button Click Event. 
+        // Implementation is done in the QueryProperties() Function
         private void btnGetProperty_Click(object sender, System.EventArgs e)
         {
             ClearStatus();
             QueryProperties();
         }
 
-        /// <summary>
-        /// Properties listbox invoke via a double click event. Implimentatin in QueryProperties().
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+        // Properties Listbox's Double Click Event
+        // Implementation is in the QueryProperties() Function
         private void lstProperties_DoubleClick(object sender, System.EventArgs e)
         {
             QueryProperties();
         }
 
-        /// <summary>
-        /// Called from the events lstProperties_DoubleClick and GetProperty_Click. Used to query the current setting from the selected 
-        /// scanner for the property(ies) selected from the Properties List Box.
-        /// </summary>
+        // Function QueryProperties()
+        // Called from the events lstProperties_DoubleClick and GetProperty_Click
+        // Used to query the current setting from the selected scanner for the property(ies)
+        // selected from the Properties List Box
         private void QueryProperties()
         {
             if (this.lstProperties.SelectedItems.Count == 0)
@@ -1172,6 +1142,7 @@ namespace WMI_Tester
                 lblQueryStatus.ForeColor = Color.Blue;
                 lblQueryStatus.Text = "Select one or more properties and Try Again";
                 return;
+
             }
 
             try
@@ -1231,56 +1202,42 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Clear output results UI controls on a click event.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Clear Button Event
+        // Used to clear the Management Data Textbox and the Barcode Data Textbox.
         private void btnClearOut_Click(object sender, System.EventArgs e)
         {
             txtOutMgmt.Clear();
             txtFirmwareProgress.Clear();
         }
 
-        /// <summary>
-        /// Used to retrieve all the storeable attributes from the scanner's property list. 
-        /// Also populate the Quick Parameter Set Listbox with the configurable parameters.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Retrieve Button Click Event
+        // Used to retrieve all the storeable attributes from the scanner's property list.
+        // Also populate the Quick Parameter Set Listbox with the configurable parameters.
         private void btnRetrieve_Click(object sender, EventArgs e)
         {
             ClearStatus();
             RetrieveParameters(RetrieveMethod.Clone);
         }
 
-        /// <summary>
-        /// Used to push all the storeable attributes stored in the clipboard to the selected Scanner. 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Push Button Click Event
+        // Used to push all the storeable attributes stored in the clipboard to the 
+        // selected Scanner
         private void btnPush_Click(object sender, EventArgs e)
         {
             ClearStatus();
             OpenPushWindow();
         }
 
-        /// <summary>
-        /// Used to save the content in the clipboard to a user specified file. 
-        /// Can be used after retrieving the data from the scanner to clipboard to save the settings to a XML/text file.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // SavetoFile Click Event
+        // Used to save the content in the clipboard to a user specified file.
+        // Can be used after retrieving the data from the scanner to clipboard to save the settings to a XML/text file
         private void btnSaveToFile_Click(object sender, EventArgs e)
         {
             SaveSettingsToFile();
         }
 
-        /// <summary>
-        /// Used to change the values in the Value field based on the data type the selected parameter. 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Quick Set Parameter List Box Index Change Event
+        // Used to change the values in the Value field based on the data type the selected parameter        
         private void cmbQuickSet_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Clear the Values field
@@ -1301,22 +1258,16 @@ namespace WMI_Tester
             cmbQuickSetVal.Text = cmbQuickSetData.Items[cmbQuickSet.SelectedIndex].ToString().Substring(cmbQuickSetData.Items[cmbQuickSet.SelectedIndex].ToString().IndexOf("_") + 1);
         }
 
-        /// <summary>
-        /// Used to set a parameter in the Quick parameter List, Once the parameter and the value is given 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Set Quick Parameter Button Click Event
+        // Used to set a parameter in the Quick parameter List, Once the parameter and the value is given
         private void btnSetPara_Click(object sender, EventArgs e)
         {
             ClearStatus();
             QuickSetParameter();
         }
 
-        /// <summary>
-        /// Used to inform the user to click 'Retieve' button to ppopulate the list if the list is empty. 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // QuickSet_Click Event
+        // Used to inform the user to click 'Retieve' button to ppopulate the list if the list is empty
         private void cmbQuickSet_Click(object sender, EventArgs e)
         {
             if (cmbQuickSet.Items.Count < 1)
@@ -1325,11 +1276,8 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Used to import scanner settings from a file to the clipboard. 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // RetrieveFile Click Event
+        // Used to import scanner settings from a file to the clipboard.
         private void btnRetrieveFile_Click(object sender, EventArgs e)
         {
             // Open Dialog Box Set up
@@ -1353,32 +1301,25 @@ namespace WMI_Tester
                 if (System.IO.File.Exists(openFileDialogMain.FileName))
                 {
                     // Read content to a temporary string and copy the content to the clipboard
-                    String strTemp = "";
-                    StreamReader streamReader = new StreamReader(openFileDialogMain.FileName);
-                    strTemp += streamReader.ReadToEnd();
-                    streamReader.Close();
-                    Clipboard.SetDataObject(strTemp);
+                    String tempStr = "";
+                    StreamReader sr = new StreamReader(openFileDialogMain.FileName);
+                    tempStr += sr.ReadToEnd();
+                    sr.Close();
+                    Clipboard.SetDataObject(tempStr);
                     MessageBox.Show("Settings Copied to clipboard. Click 'Push' to send data to a scanner", "Success", MessageBoxButtons.OK);
                 }
             }
         }
 
-        /// <summary>
-        /// Used to get the quickset parameter list relevant to the current scanner.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // QuickSetRetrieve_Click event
+        // Used to get the quickset parameter list relevant to the current scanner
         private void btnQuickSetRetrieve_Click(object sender, EventArgs e)
         {
             ClearStatus();
             RetrieveParameters(RetrieveMethod.Quickset);
         }
 
-        /// <summary>
-        /// Form load event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Main Form Load Event
         private void frmMain_Load(object sender, System.EventArgs e)
         {
             // Initilized the toolTipMain control to display Tool Tips
@@ -1392,72 +1333,74 @@ namespace WMI_Tester
             toolTipMain.SetToolTip(btnConnect, "Connect to localhost or remote computer");
         }
 
-        /// <summary>
-        /// Used to populate the serial numbers combobox with the serial numbers of the scanners related to the model selected.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Model Combobox index changed event
+        // Used to populate the serial numbers combobox with the serial numbers of the scanners 
+        // related to the model selected
         private void cmbModel_SelectedIndexChanged(object sender, System.EventArgs e)
         {
             // Clear the Serial number combo box
             cmbSerialFiltered.Items.Clear();
             // Enumurate the cmbPart combobox and add serial numbers relevant to the selected model
-            for (int index = 0; index < partCollection.Count; index++)
+            for (int i = 0; i < partCollection.Count; i++)
             {
                 try
                 {
-                    if (partCollection[index].Substring(0, cmbModel.Text.Length) == cmbModel.Text)
+                    if (partCollection[i].Substring(0, cmbModel.Text.Length) == cmbModel.Text)
                     {
-                        cmbSerialFiltered.Items.Add(serialCollection[index]);
+                        cmbSerialFiltered.Items.Add(serialCollection[i]);
                     }
                 }
                 catch
                 {
+                    ;
                 }
             }
-            // Invoke the SerialFiltered_SelectedIndexChanged event.
+            // Fire the SerialFiltered_SelectedIndexChanged event.
             cmbSerialFiltered.SelectedIndex = 0;
         }
 
-        /// <summary>
-        /// Used to get the firmware and date of manufacture of the selected scanner from the serial number.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // SerialFiltered SelectedIndexChanged Event
+        // Used to get the firmware and date of manufacture of the selected scanner from the 
+        // Serial number combo box
         private void cmbSerialFiltered_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            int index = 0;
-            for (index = 0; index < partCollection.Count; index++)
+
+            int i = 0;
+            for (i = 0; i < partCollection.Count; i++)
             {
                 // Enumurate the SerialNumber and PartNumber hidden comboboxes and update the
                 // global variables strPartNumber and strSerialNumber
+
                 
                 // Make this check, since certain scanners have XXXXXXXXX as model
-                if (partCollection[index].Length < cmbModel.Text.Length)
+                if (partCollection[i].Length < cmbModel.Text.Length)
                 {   
                     continue;
                 }
 
-                if (serialCollection[index] == cmbSerialFiltered.Text.ToString() && partCollection[index].Substring(0, cmbModel.Text.Length) == cmbModel.Text)
+                if (serialCollection[i] == cmbSerialFiltered.Text.ToString() &&
+                    partCollection[i].Substring(0, cmbModel.Text.Length) == cmbModel.Text)
+
                 {
                     // Update Global Variables         
-                    strPartNumber = partCollection[index].Trim();
-                    strSerialNumber = serialCollection[index].Trim();
+                    strPartNumber = partCollection[i].Trim();
+                    strSerialNumber = serialCollection[i].Trim();
                     this.Text = "Scanner WMI Test - " + strComputer + " - " + strPartNumber + " - " + strSerialNumber;    // Update the Form's Caption
                     if (strLastModel != cmbModel.Text.ToString())
                     {
                         cmbQuickSet.Items.Clear();
                         cmbQuickSetData.Items.Clear();
                         cmbQuickSetVal.Items.Clear();
-                        foreach (Control ctrl in groupBoxQuickSet.Controls)
+                        foreach (Control c in groupBoxQuickSet.Controls)
                         {
-                            if (ctrl.Name != btnQuickSetRetrieve.Name)
+                            if (c.Name != btnQuickSetRetrieve.Name)
                             {
-                                ctrl.Enabled = false;
+                                c.Enabled = false;
                             }
                         }
                         strLastModel = cmbModel.Text.ToString();
                     }
+                    blnDiscovered = true;
                     ClearStatus();
                     // Exit enumeration
                     break;
@@ -1469,50 +1412,55 @@ namespace WMI_Tester
 
             try
             {
-                ManagementObject mgmtObject = new ManagementObject();
-                mgmtObject.Scope = mgmtScope;
-                mgmtObject.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" +
+                ManagementObject o = new ManagementObject();
+                o.Scope = mgmtScope;
+                o.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" +
                    strPartNumber + "',SerialNumber='" + strSerialNumber + "'");
 
-                // Check if the SerialNumber is equalant (Used to create an exception if the WMI Path is invalid)
+                //// Check if the SerialNumber is equalant (Used to create an exception if the WMI Path is invalid)
                 // The exception is handled below
-                if (mgmtObject["SerialNumber"].ToString() == strSerialNumber)
+                if (o["SerialNumber"].ToString() == strSerialNumber)
                 {
                     // Get the Manufacture Date and Firmware Version	
-                    Object objVal = mgmtObject.GetPropertyValue("DateOfManufacture");
+                    Object objVal = o.GetPropertyValue("DateOfManufacture");
                     if (objVal != null)
                     {
                         txtDOM.Text = objVal.ToString();
                     }
-                    objVal = mgmtObject.GetPropertyValue("FirmwareVersion");
+                    objVal = o.GetPropertyValue("FirmwareVersion");
                     if (objVal != null)
                     {
                         txtFirmware.Text = objVal.ToString();
                     }
-                    objVal = mgmtObject.GetPropertyValue("FirmwareUpdateStatus");
+                    objVal = o.GetPropertyValue("FirmwareUpdateStatus");
                     if (objVal != null)
                     {
                         string fwupStatus = objVal.ToString();
                         if (fwupStatus.Contains("Progress"))
                         {
-                            objVal = mgmtObject.GetPropertyValue("FirmwareUpdateBlockCount");
+                            objVal = o.GetPropertyValue("FirmwareUpdateBlockCount");
                             string blocks = objVal.ToString();
+                            //txtFirmwareProgress.Text = "Progress - Block:" + blocks;
                             UpdateFirmwareDownloadProgress("Progress - Block:" + blocks);
                         }
                         else
                         {
+                            //txtFirmwareProgress.Text = fwupStatus;
                             UpdateFirmwareDownloadProgress(fwupStatus);
                         }
                     }
                 }
             }
+            // Generic Exception Handler
             catch (Exception)
             {
-                // Exception could occur if a scanner is disconnected while executing this function.
+                // Exception could occur if a scanner is disconnected while
+                // executing this function.
                 // Re-discover scanners
-                serialCollection.RemoveAt(index) ;
-                partCollection.RemoveAt(index);
-                iScannerCount -= 1;
+               // this.BeginInvoke(new MethodInvoker(Discover));
+                serialCollection.RemoveAt(i) ;
+                partCollection.RemoveAt(i);
+                no_of_Scanners -= 1;
                 cmbSerialFiltered.Items.Remove(cmbSerialFiltered.Text.ToString());
                 cmbModel.SelectedIndex = 0;
                 cmbSerialFiltered.SelectedIndex = 0;
@@ -1520,19 +1468,18 @@ namespace WMI_Tester
             Cursor.Current = Cursors.Default;
         }
 
-        /// <summary>
-        /// Update parameters.
-        /// </summary>
+        
         private void UpdateParameters()
         {
-            ManagementBaseObject inParams = mgmtClass.GetMethodParameters(cmbMethod.Text.Trim());
+            ManagementBaseObject inparams = mgmtClass.GetMethodParameters(cmbMethod.Text.Trim());
             cmbIN.Items.Clear();
             txtIN.Text = "";
             txtIN.Update();
-            // Enumarate the Properties and poplulate the Listbox if the current method have one or more paramaeters
-            if (inParams != null)
+            // Enumarate the Properties and poplulate the Listbox if the current method have one or more 
+            // paramaeters
+            if (inparams != null)
             {
-                foreach (PropertyData md in inParams.Properties)
+                foreach (PropertyData md in inparams.Properties)
                 {
                     cmbIN.Items.Add(md.Name);
                 }
@@ -1622,9 +1569,6 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Clear UI controls.
-        /// </summary>
         private void ClearStatus()
         {
             lblCloneStatus.Text = "";
@@ -1634,10 +1578,7 @@ namespace WMI_Tester
             this.Update();
         }
 
-        /// <summary>
-        /// Retrieves parameters for cloning and quick setting 
-        /// </summary>
-        /// <param name="inParameterMethod">Parameter method</param>
+        // Retrieves parameters for cloning and quick setting
         private void RetrieveParameters(RetrieveMethod inParameterMethod)
         {
             Cursor.Current = Cursors.WaitCursor;        //Change Cursor Icon			
@@ -1653,18 +1594,18 @@ namespace WMI_Tester
             try
             {
                 // Create a new ManagementObject based on the current Serial Number and the Part Numebr
-                ManagementObject mgmtObject = new ManagementObject();
-                mgmtObject.Scope = mgmtScope;
-                mgmtObject.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strPartNumber + "',SerialNumber='" + strSerialNumber + "'");
+                ManagementObject o = new ManagementObject();
+                o.Scope = mgmtScope;
+                o.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strPartNumber + "',SerialNumber='" + strSerialNumber + "'");
 
                 // Check if the SerialNumber is equalant (Used to create an exception if the WMI Path is invalid)
                 // The exception is handled below
-                if (mgmtObject["SerialNumber"].ToString() == strSerialNumber)
+                if (o["SerialNumber"].ToString() == strSerialNumber)
                 {
                     // Create ManagementBaseObject and get the parameters to the Method "GetAllAttributes"
-                    ManagementBaseObject inParams = mgmtObject.GetMethodParameters("GetAllAttributes");
+                    ManagementBaseObject inParams = o.GetMethodParameters("GetAllAttributes");
                     // Create ManagementBaseObject and store the result from the InvokeMethod for "GetAllAttributes"
-                    ManagementBaseObject outparams = mgmtObject.InvokeMethod("GetAllAttributes", inParams, null);
+                    ManagementBaseObject outparams = o.InvokeMethod("GetAllAttributes", inParams, null);
 
                     if (outparams != null)
                     {
@@ -1693,12 +1634,12 @@ namespace WMI_Tester
                         attributeList = "<attrib_list>" + attributeList + "</attrib_list>";
 
                         // Create ManagementBaseObject and get the parameters to the Method "GetAttributes"
-                        inParams = mgmtObject.GetMethodParameters("GetAttributes");
+                        inParams = o.GetMethodParameters("GetAttributes");
                         // Fill the Parameter "attNumberList" with the attributeList string
                         inParams["attNumberList"] = attributeList;
 
                         // Invoke the "GetAttributes" Method and save the result to a new ManagementBaseObject
-                        outparams = mgmtObject.InvokeMethod("GetAttributes", inParams, null);
+                        outparams = o.InvokeMethod("GetAttributes", inParams, null);
                         if (outparams != null)
                         {
                             // Create Temporary XML File and Write the Attributes of the return ManagementBaseObject to it
@@ -1718,14 +1659,14 @@ namespace WMI_Tester
                             cmbQuickSet.Items.Clear();
                             cmbQuickSetData.Items.Clear();
                             bool blnBluetoothPinCode = false;
-                            foreach (DataRow dataRowAttributes in dsAttr.Tables[0].Select("permission='RWP' OR permission='RW'"))
+                            foreach (DataRow dr in dsAttr.Tables[0].Select("permission='RWP' OR permission='RW'"))
                             {
                                 // Workaround: To remove the 392/552 Attribute IDs from the query. (Bug)
                                 /*if (chkTestMode.Checked == true && dr["id"].ToString().Equals("392"))
                                 {
                                     continue;
                                 }*/
-                                if (dataRowAttributes["id"].ToString().Equals("552"))
+                                if (dr["id"].ToString().Equals("552"))
                                 {
                                     blnBluetoothPinCode = true;
                                     continue;
@@ -1733,22 +1674,22 @@ namespace WMI_Tester
 
                                 // Add the Attribute to the Quick Parameter Set Combobox if the data type is not
                                 // "A" which represent ADF Rules (Cannot be set using WMI Codes)
-                                if (!dataRowAttributes["datatype"].ToString().Equals("A"))
+                                if (!dr["datatype"].ToString().Equals("A"))
                                 {
-                                    if (dataRowAttributes["name"].ToString().Length > 3)
+                                    if (dr["name"].ToString().Length > 3)
                                     {
-                                        cmbQuickSet.Items.Add(dataRowAttributes["name"].ToString().Substring(1, dataRowAttributes["name"].ToString().Length - 2));
+                                        cmbQuickSet.Items.Add(dr["name"].ToString().Substring(1, dr["name"].ToString().Length - 2));
                                     }
                                     else
                                     {
-                                        cmbQuickSet.Items.Add(dataRowAttributes["id"].ToString());
+                                        cmbQuickSet.Items.Add(dr["id"].ToString());
                                     }
                                     // Add a entry to the hidden data combo box with the data type and the ID of the attribute 
-                                    cmbQuickSetData.Items.Add(dataRowAttributes["datatype"].ToString() + "-" + dataRowAttributes["id"].ToString() + "_" + dataRowAttributes["value"].ToString());
+                                    cmbQuickSetData.Items.Add(dr["datatype"].ToString() + "-" + dr["id"].ToString() + "_" + dr["value"].ToString());
                                 }
                                 // Append to the attributeList string all the Attribute ID's with ("permission='RWP' OR permission='RW'")
                                 // for the currently selected WMI scanner
-                                attributeList += dataRowAttributes["id"].ToString() + ",";
+                                attributeList += dr["id"].ToString() + ",";
                             }
                             if (inParameterMethod == RetrieveMethod.Clone)
                             {
@@ -1762,12 +1703,12 @@ namespace WMI_Tester
                                 attributeList = "<attrib_list>" + attributeList + "</attrib_list>";
 
                                 // Create ManagementBaseObject and get the parameters to the Method "GetAttributes"
-                                inParams = mgmtObject.GetMethodParameters("GetAttributes");
+                                inParams = o.GetMethodParameters("GetAttributes");
                                 // Fill the Parameter "attNumberList" with the attributeList string
                                 inParams["attNumberList"] = attributeList;
 
                                 // Invoke the "GetAttributes" Method and save the result to a new ManaementBaseObject
-                                outparams = mgmtObject.InvokeMethod("GetAttributes", inParams, null);
+                                outparams = o.InvokeMethod("GetAttributes", inParams, null);
                                 if (outparams != null)
                                 {
                                     // Clear the Clipboard and save the output to the clipboard as a string
@@ -1780,7 +1721,7 @@ namespace WMI_Tester
                             // Update Management Textbox
                             txtOutMgmt.AppendText("\r\n\r\n-----------------------------------------------------------------------------------------------------------\r\n");
                             txtOutMgmt.AppendText("Serial Number\t: ");
-                            txtOutMgmt.AppendText(mgmtObject["SerialNumber"].ToString());
+                            txtOutMgmt.AppendText(o["SerialNumber"].ToString());
                             txtOutMgmt.AppendText("\r\nRetrieved " + (inParameterMethod == RetrieveMethod.Clone ? "all settings and " : "") + "quick parameter list");
                             txtOutMgmt.AppendText("\r\nReturn Value\t: ");
 
@@ -1818,9 +1759,9 @@ namespace WMI_Tester
                 lblStatus.ForeColor = Color.Red;
                 lblStatus.Text = "Failed";
             }
-            catch (XmlException ex)
+            catch (XmlException err)
             {
-                MessageBox.Show("Illegal Characters Found while Passing XML data sent from the scanner\r\nPlease remove, reattach the scanner and try again\r\n\r\n" + "Error :" + ex.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Illegal Characters Found while Passing XML data sent from the scanner\r\nPlease remove, reattach the scanner and try again\r\n\r\n" + "Error :" + err.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 lblStatus.ForeColor = Color.Red;
                 lblStatus.Text = "Failed";
             }
@@ -1832,34 +1773,33 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Execute WMI queries.
-        /// </summary>
+
+
         private void ExecuteWMI()
         {
             Cursor.Current = Cursors.WaitCursor;
             try
             {
                 // Create a new ManagementObject based on the current Serial Number and the Part Numebr
-                ManagementObject mgmtObject = new ManagementObject();
-                mgmtObject.Scope = mgmtScope;
-                mgmtObject.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strPartNumber + "',SerialNumber='" + strSerialNumber + "'");
+                ManagementObject o = new ManagementObject();
+                o.Scope = mgmtScope;
+                o.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strPartNumber + "',SerialNumber='" + strSerialNumber + "'");
 
                 // Check if the SerialNumber is equalant (Used to create an exception if the WMI Path is invalid)
                 // The exception is handled below
-                if (mgmtObject["SerialNumber"].ToString() == strSerialNumber)
+                if (o["SerialNumber"].ToString() == strSerialNumber)
                 {
                     // Update Management Textbox
                     txtOutMgmt.AppendText("\r\n\r\n-----------------------------------------------------------------------------------------------------------\r\n");
                     txtOutMgmt.AppendText("Part Number\t: ");
-                    txtOutMgmt.AppendText(mgmtObject["PartNumber"].ToString());
+                    txtOutMgmt.AppendText(o["PartNumber"].ToString());
                     txtOutMgmt.AppendText("\r\nSerial Number\t: ");
-                    txtOutMgmt.AppendText(mgmtObject["SerialNumber"].ToString());
+                    txtOutMgmt.AppendText(o["SerialNumber"].ToString());
                     txtOutMgmt.AppendText("\r\nMethod Invoked\t: ");
                     txtOutMgmt.AppendText(cmbMethod.Text.Trim());
 
                     // Get the Method's Parameters and populate the parameter with the text in the 'In' textbox
-                    ManagementBaseObject inParams = mgmtObject.GetMethodParameters(cmbMethod.Text.Trim());
+                    ManagementBaseObject inParams = o.GetMethodParameters(cmbMethod.Text.Trim());
                     if (inParams != null)
                     {
                         inParams[cmbIN.Text.Trim()] = txtIN.Text.Trim();
@@ -1868,20 +1808,21 @@ namespace WMI_Tester
                     }
 
                     // Invoke the method and save the result to a new ManaementBaseObject
-                    ManagementBaseObject outParams = mgmtObject.InvokeMethod(cmbMethod.Text.Trim(), inParams, null);
+                    ManagementBaseObject outparams = o.InvokeMethod(cmbMethod.Text.Trim(), inParams, null);
 
                     txtOutMgmt.AppendText("\r\nReturn Value\t: ");
 
                     // Check if an Output resulted from the Invoked Method
-                    if (outParams != null)
+                    if (outparams != null)
                     {
-                        string strRet = outParams["ReturnValue"].ToString();
+                        string strRet = outparams["ReturnValue"].ToString();
                         txtOutMgmt.AppendText(strRet);
                         // ReturnValue=0 means the method invoked succesfully
                         if (strRet.Equals("0"))     
                         {
                             if (cmbMethod.Text.Trim() == "UpdateFirmware")
                             {
+                                ;
                             }
                             else
                             {
@@ -1896,19 +1837,21 @@ namespace WMI_Tester
                         }
 
                         // Display all the return values to the Management Textbox except the ReturnValue Data
-                        foreach (PropertyData md in outParams.Properties)
+                        foreach (PropertyData md in outparams.Properties)
                         {
                             if (md.Name != "ReturnValue")
                             {
                                 txtOutMgmt.AppendText("\r\n");
                                 txtOutMgmt.AppendText(md.Name);
                                 txtOutMgmt.AppendText("\t:\r\n");
-                                txtOutMgmt.AppendText(outParams[md.Name].ToString());        
-                            }   
-                        }   
-                    }   
-                }    
-            }
+
+
+                                    txtOutMgmt.AppendText(outparams[md.Name].ToString());
+                                }
+                            }
+                        }
+                    }
+                }
             
             // ManagementException Exception Handler
             // Exception occurs if the Scanner is not connected to the system at the time command is executed.
@@ -1926,39 +1869,40 @@ namespace WMI_Tester
             txtOutMgmt.AppendText("\r\n-----------------------------------------------------------------------------------------------------------\r\n");
             Cursor.Current = Cursors.Arrow;
         }
+
        
-        /// <summary>
-        /// Open the 'attribute' dialog windows 
-        /// </summary>
+
         private void OpenPushWindow()
         {
+
             // Extract the Clipboard Data 
-            IDataObject objData = Clipboard.GetDataObject();
+            IDataObject iData = Clipboard.GetDataObject();
 
             // Validate the content in the clipboard to check if the content is text
-            if (objData.GetDataPresent(DataFormats.Text) == true)
+            if (iData.GetDataPresent(DataFormats.Text) == true)
             {
-                string strClipboardText = (string)objData.GetData(DataFormats.Text).ToString();
-                strClipboardText = strClipboardText.Replace("<name></name>", String.Empty);
-                strClipboardText = strClipboardText.Replace("<permission>RWP</permission>", String.Empty);
-                if (strClipboardText.Length > 13)
+                string ClipboardText = (string)iData.GetData(DataFormats.Text).ToString();
+                ClipboardText = ClipboardText.Replace("<name></name>", String.Empty);
+                ClipboardText = ClipboardText.Replace("<permission>RWP</permission>", String.Empty);
+                if (ClipboardText.Length > 13)
                 {
                     // Create a new ManagementObject based on the current Serial Number and the Part Numebr
 
                     // Validate the content in the clipboard to check if its in valid format
-                    if (strClipboardText.Substring(0, 13).Equals("<attrib_list>"))
+                    if (ClipboardText.Substring(0, 13).Equals("<attrib_list>"))
                     {
                         try
                         {
+
                             frmCloneWiz frmWiz = new frmCloneWiz();
                             frmWiz.SetScope(ref mgmtScope);
-                            for (int index = 0; index < serialCollection.Count; index++)
+                            for (int i = 0; i < serialCollection.Count; i++)
                             {
-                                frmWiz.chkLstScanners.Items.Add(partCollection[index] + "\\" + serialCollection[index]);
+                                frmWiz.chkLstScanners.Items.Add(partCollection[i] + "\\" + serialCollection[i]);
                             }
                             frmWiz.strWizModel = cmbModel.Text;
                             frmWiz.strWizComputer = strComputer;
-                            frmWiz.strParameters = strClipboardText;
+                            frmWiz.strParameters = ClipboardText;
                             frmWiz.ShowDialog(this);
                         }
                         // Generic Exception Handler
@@ -1980,10 +1924,6 @@ namespace WMI_Tester
                 MessageBox.Show("Data in Clipboard is not an Attribute List.\nPlease Retrieve data and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        /// <summary>
-        /// Save the settings to a file (XML, TXT or any other format).
-        /// </summary>
         private void SaveSettingsToFile()
         {
             saveFileDialogMain.Filter = "XML files (*.xml)|*.xml|txt files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -2019,9 +1959,7 @@ namespace WMI_Tester
             }
         }
 
-        /// <summary>
-        /// Store scanner parameters.
-        /// </summary>
+
         private void QuickSetParameter()
         {
             // Create a new ManagementObject based on the current Serial Number and the Part Numebr
@@ -2103,83 +2041,70 @@ namespace WMI_Tester
                 lblQuickSetStatus.Text = "Failed";
             }
             // Generic Exception Handler
-            catch (Exception ex)
+            catch (Exception err)
             {
-                MessageBox.Show("Unknown Error: " + ex.Message.ToString());
+                MessageBox.Show("Unknown Error: " + err.Message.ToString());
                 lblQuickSetStatus.ForeColor = Color.Red;
                 lblQuickSetStatus.Text = "Failed";
             }
         }
 
-        /// <summary>
-        /// Enable/Disable all the UI controls except WMI connect.
-        /// </summary>
-        /// <param name="bEnableStatus">Status of the control</param>
-        private void ControlFocus(bool bEnableStatus)
+        // Disable all controls except groupBox1, and enable all
+        private void ControlFocus(bool blnEnable)
         {
             foreach (Control c in this.Controls)
             {
-                if (bEnableStatus == false)
+                if (blnEnable == false)
                 {
                     if ((c.GetType() == typeof(System.Windows.Forms.GroupBox)) &
                         c.Name != groupBoxConnect.Name)
                     {
-                        c.Enabled = bEnableStatus;
+                        c.Enabled = blnEnable;
                     }
                 }
                 else
                 {
                     if (c.GetType() == typeof(System.Windows.Forms.GroupBox))
                     {
-                        c.Enabled = bEnableStatus;
+                        c.Enabled = blnEnable;
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Enable/Disable groupbox control of the UI.
-        /// </summary>
-        /// <param name="bEnableStatus">Status of the control</param>
-        /// <param name="strGroupBoxName">Name of the groupbox</param>
-        private void ControlFocus(bool bEnableStatus, string strGroupBoxName)
+        // Enable or disable only given groupbox
+        private void ControlFocus(bool blnEnable, string selectGroupBox)
         {
             foreach (Control c in this.Controls)
             {
                 if ((c.GetType() == typeof(System.Windows.Forms.GroupBox)) &
-                   c.Name == strGroupBoxName)
+                   c.Name == selectGroupBox)
                 {
-                    c.Enabled = bEnableStatus;
+                    c.Enabled = blnEnable;
                 }
             }
         }
 
-        /// <summary>
-        /// Scanner firmware update progress call back.
-        /// </summary>
-        /// <param name="strFiremwareProgress">Update progress.</param>
-        private void UpdateFirmwareDownloadProgress(string strFiremwareProgress)
+
+        private void UpdateFirmwareDownloadProgress(string strIn)
         {
             if (this.txtFirmwareProgress.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(UpdateFirmwareDownloadProgress);
-                this.BeginInvoke(d, new object[] { strFiremwareProgress });
+                this.BeginInvoke(d, new object[] { strIn });
             }
             else
             {
-                this.txtFirmwareProgress.Text = strFiremwareProgress;
+                this.txtFirmwareProgress.Text = strIn;
             }
         }
 
-        /// <summary>
-        /// Scanner discovery status.
-        /// </summary>
-        /// <param name="strScannerDiscoveryStatus"></param>
-        private void UpdateDiscoverStatus(string strScannerDiscoveryStatus)
+        private void UpdateDiscoverStatus(string strIn)
         {
-            this.lblDiscoverStatus.Text = strScannerDiscoveryStatus;
+            this.lblDiscoverStatus.Text = strIn;
             this.lblDiscoverStatus.Update();
         }
+
 
         /// <summary>
         /// DiscoveryEventHandler implements the call back functions, the 
@@ -2208,7 +2133,7 @@ namespace WMI_Tester
 
         /// <summary>
         /// FirmwareUpdateEventHandler implements the call back functions, the 
-        /// ManagementEventWatcher events would invoke.
+        /// ManagementEventWatcher events would invoke
         /// </summary>
         public class FirmwareUpdateEventHandler
         {
@@ -2261,5 +2186,8 @@ namespace WMI_Tester
 
             }
         }
+
+
+
     }
 }

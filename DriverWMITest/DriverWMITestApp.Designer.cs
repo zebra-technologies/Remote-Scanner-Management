@@ -81,26 +81,26 @@ namespace WMI_Test
             this.tabPageDriverWMITest = new System.Windows.Forms.TabPage();
             this.groupBoxOutput = new System.Windows.Forms.GroupBox();
             this.listBoxDW = new System.Windows.Forms.ListBox();
-            this.chkAutoSwitchHostMode = new System.Windows.Forms.CheckBox();
-            this.chkPNPEventsCapture = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxDW = new System.Windows.Forms.CheckBox();
             this.textBoxEvents = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
-            this.btnClear = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.textBoxManagementDataDW = new System.Windows.Forms.TextBox();
             this.groupBoxQuery = new System.Windows.Forms.GroupBox();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.btnQueryProperty = new System.Windows.Forms.Button();
-            this.lstWMIPorpertyList = new System.Windows.Forms.ListBox();
+            this.buttonGetPropertyDW = new System.Windows.Forms.Button();
+            this.listBoxPropertiesDW = new System.Windows.Forms.ListBox();
             this.groupBoxExecDW = new System.Windows.Forms.GroupBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.btnQueryMethod = new System.Windows.Forms.Button();
+            this.buttonExecuteDW = new System.Windows.Forms.Button();
             this.pnlReboot = new System.Windows.Forms.Panel();
             this.txtScannerID = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.rbGroup = new System.Windows.Forms.RadioButton();
             this.rbIndividual = new System.Windows.Forms.RadioButton();
-            this.cmbWMIMethodsList = new System.Windows.Forms.ComboBox();
+            this.comboBoxMethodsDW = new System.Windows.Forms.ComboBox();
             this.label11 = new System.Windows.Forms.Label();
             this.pnlScannerCapability = new System.Windows.Forms.Panel();
             this.txtGetCapaScannerID = new System.Windows.Forms.TextBox();
@@ -117,12 +117,12 @@ namespace WMI_Test
             this.label6 = new System.Windows.Forms.Label();
             this.txtAtribMetaPath = new System.Windows.Forms.TextBox();
             this.groupBoxConnect = new System.Windows.Forms.GroupBox();
-            this.lblDriverWMIConnectStatus = new System.Windows.Forms.Label();
-            this.btnConnectWMIDriver = new System.Windows.Forms.Button();
-            this.txtHostIP = new System.Windows.Forms.TextBox();
+            this.labelConnetionStatusDW = new System.Windows.Forms.Label();
+            this.buttonConnectDW = new System.Windows.Forms.Button();
+            this.textBoxIPAddressDW = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControlWMITest = new System.Windows.Forms.TabControl();
-            this.openFileDialogAttribMetaFile = new System.Windows.Forms.OpenFileDialog();
+            this.ofdAtribMeta = new System.Windows.Forms.OpenFileDialog();
             this.tabPageDriverWMITest.SuspendLayout();
             this.groupBoxOutput.SuspendLayout();
             this.groupBoxQuery.SuspendLayout();
@@ -590,7 +590,7 @@ namespace WMI_Test
             this.tabPageDriverWMITest.Controls.Add(this.groupBoxConnect);
             this.tabPageDriverWMITest.Location = new System.Drawing.Point(4, 22);
             this.tabPageDriverWMITest.Name = "tabPageDriverWMITest";
-            this.tabPageDriverWMITest.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageDriverWMITest.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.tabPageDriverWMITest.Size = new System.Drawing.Size(992, 864);
             this.tabPageDriverWMITest.TabIndex = 1;
             this.tabPageDriverWMITest.Text = "Driver WMI Test";
@@ -602,11 +602,11 @@ namespace WMI_Test
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBoxOutput.Controls.Add(this.listBoxDW);
-            this.groupBoxOutput.Controls.Add(this.chkAutoSwitchHostMode);
-            this.groupBoxOutput.Controls.Add(this.chkPNPEventsCapture);
+            this.groupBoxOutput.Controls.Add(this.checkBox1);
+            this.groupBoxOutput.Controls.Add(this.checkBoxDW);
             this.groupBoxOutput.Controls.Add(this.textBoxEvents);
             this.groupBoxOutput.Controls.Add(this.label15);
-            this.groupBoxOutput.Controls.Add(this.btnClear);
+            this.groupBoxOutput.Controls.Add(this.button5);
             this.groupBoxOutput.Controls.Add(this.textBoxManagementDataDW);
             this.groupBoxOutput.Location = new System.Drawing.Point(414, 6);
             this.groupBoxOutput.Name = "groupBoxOutput";
@@ -625,31 +625,31 @@ namespace WMI_Test
             this.listBoxDW.Visible = false;
             this.listBoxDW.SelectedIndexChanged += new System.EventHandler(this.listBoxDW_SelectedIndexChanged);
             // 
-            // chkAutoSwitchHostMode
+            // checkBox1
             // 
-            this.chkAutoSwitchHostMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.chkAutoSwitchHostMode.AutoSize = true;
-            this.chkAutoSwitchHostMode.Enabled = false;
-            this.chkAutoSwitchHostMode.Location = new System.Drawing.Point(208, 326);
-            this.chkAutoSwitchHostMode.Name = "chkAutoSwitchHostMode";
-            this.chkAutoSwitchHostMode.Size = new System.Drawing.Size(138, 17);
-            this.chkAutoSwitchHostMode.TabIndex = 16;
-            this.chkAutoSwitchHostMode.Text = "Auto Switch Host Mode";
-            this.chkAutoSwitchHostMode.UseVisualStyleBackColor = true;
-            this.chkAutoSwitchHostMode.CheckedChanged += new System.EventHandler(this.chkAutoSwitchHostMode_CheckedChanged);
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Enabled = false;
+            this.checkBox1.Location = new System.Drawing.Point(208, 326);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(138, 17);
+            this.checkBox1.TabIndex = 16;
+            this.checkBox1.Text = "Auto Switch Host Mode";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_1);
             // 
-            // chkPNPEventsCapture
+            // checkBoxDW
             // 
-            this.chkPNPEventsCapture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.chkPNPEventsCapture.AutoSize = true;
-            this.chkPNPEventsCapture.Enabled = false;
-            this.chkPNPEventsCapture.Location = new System.Drawing.Point(11, 326);
-            this.chkPNPEventsCapture.Name = "chkPNPEventsCapture";
-            this.chkPNPEventsCapture.Size = new System.Drawing.Size(153, 17);
-            this.chkPNPEventsCapture.TabIndex = 15;
-            this.chkPNPEventsCapture.Text = "Listen Scanner PNP Event";
-            this.chkPNPEventsCapture.UseVisualStyleBackColor = true;
-            this.chkPNPEventsCapture.CheckedChanged += new System.EventHandler(this.chkPNPEventsCapture_CheckedChanged);
+            this.checkBoxDW.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBoxDW.AutoSize = true;
+            this.checkBoxDW.Enabled = false;
+            this.checkBoxDW.Location = new System.Drawing.Point(11, 326);
+            this.checkBoxDW.Name = "checkBoxDW";
+            this.checkBoxDW.Size = new System.Drawing.Size(153, 17);
+            this.checkBoxDW.TabIndex = 15;
+            this.checkBoxDW.Text = "Listen Scanner PNP Event";
+            this.checkBoxDW.UseVisualStyleBackColor = true;
+            this.checkBoxDW.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // textBoxEvents
             // 
@@ -675,15 +675,15 @@ namespace WMI_Test
             this.label15.TabIndex = 8;
             this.label15.Text = "Management Data";
             // 
-            // btnClear
+            // button5
             // 
-            this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClear.Location = new System.Drawing.Point(459, 501);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(80, 24);
-            this.btnClear.TabIndex = 7;
-            this.btnClear.Text = "Clear";
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.Location = new System.Drawing.Point(459, 501);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(80, 24);
+            this.button5.TabIndex = 7;
+            this.button5.Text = "Clear";
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // textBoxManagementDataDW
             // 
@@ -708,8 +708,8 @@ namespace WMI_Test
             | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBoxQuery.Controls.Add(this.label13);
             this.groupBoxQuery.Controls.Add(this.label14);
-            this.groupBoxQuery.Controls.Add(this.btnQueryProperty);
-            this.groupBoxQuery.Controls.Add(this.lstWMIPorpertyList);
+            this.groupBoxQuery.Controls.Add(this.buttonGetPropertyDW);
+            this.groupBoxQuery.Controls.Add(this.listBoxPropertiesDW);
             this.groupBoxQuery.Enabled = false;
             this.groupBoxQuery.Location = new System.Drawing.Point(8, 348);
             this.groupBoxQuery.Name = "groupBoxQuery";
@@ -739,32 +739,32 @@ namespace WMI_Test
             this.label14.TabIndex = 19;
             this.label14.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
-            // btnQueryProperty
+            // buttonGetPropertyDW
             // 
-            this.btnQueryProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnQueryProperty.Location = new System.Drawing.Point(185, 144);
-            this.btnQueryProperty.Name = "btnQueryProperty";
-            this.btnQueryProperty.Size = new System.Drawing.Size(87, 24);
-            this.btnQueryProperty.TabIndex = 18;
-            this.btnQueryProperty.Text = "Get";
-            this.btnQueryProperty.Click += new System.EventHandler(this.btnQueryProperty_Click);
+            this.buttonGetPropertyDW.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonGetPropertyDW.Location = new System.Drawing.Point(185, 144);
+            this.buttonGetPropertyDW.Name = "buttonGetPropertyDW";
+            this.buttonGetPropertyDW.Size = new System.Drawing.Size(87, 24);
+            this.buttonGetPropertyDW.TabIndex = 18;
+            this.buttonGetPropertyDW.Text = "Get";
+            this.buttonGetPropertyDW.Click += new System.EventHandler(this.buttonGetPropertyDW_Click);
             // 
-            // lstWMIPorpertyList
+            // listBoxPropertiesDW
             // 
-            this.lstWMIPorpertyList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.listBoxPropertiesDW.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.lstWMIPorpertyList.Location = new System.Drawing.Point(112, 30);
-            this.lstWMIPorpertyList.Name = "lstWMIPorpertyList";
-            this.lstWMIPorpertyList.ScrollAlwaysVisible = true;
-            this.lstWMIPorpertyList.Size = new System.Drawing.Size(280, 108);
-            this.lstWMIPorpertyList.TabIndex = 17;
+            this.listBoxPropertiesDW.Location = new System.Drawing.Point(112, 30);
+            this.listBoxPropertiesDW.Name = "listBoxPropertiesDW";
+            this.listBoxPropertiesDW.ScrollAlwaysVisible = true;
+            this.listBoxPropertiesDW.Size = new System.Drawing.Size(280, 108);
+            this.listBoxPropertiesDW.TabIndex = 17;
             // 
             // groupBoxExecDW
             // 
             this.groupBoxExecDW.Controls.Add(this.label10);
-            this.groupBoxExecDW.Controls.Add(this.btnQueryMethod);
+            this.groupBoxExecDW.Controls.Add(this.buttonExecuteDW);
             this.groupBoxExecDW.Controls.Add(this.pnlReboot);
-            this.groupBoxExecDW.Controls.Add(this.cmbWMIMethodsList);
+            this.groupBoxExecDW.Controls.Add(this.comboBoxMethodsDW);
             this.groupBoxExecDW.Controls.Add(this.label11);
             this.groupBoxExecDW.Controls.Add(this.pnlScannerCapability);
             this.groupBoxExecDW.Controls.Add(this.pnlSwitchHostMode);
@@ -785,15 +785,15 @@ namespace WMI_Test
             this.label10.TabIndex = 15;
             this.label10.Text = "Input Parameters";
             // 
-            // btnQueryMethod
+            // buttonExecuteDW
             // 
-            this.btnQueryMethod.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnQueryMethod.Location = new System.Drawing.Point(187, 204);
-            this.btnQueryMethod.Name = "btnQueryMethod";
-            this.btnQueryMethod.Size = new System.Drawing.Size(87, 24);
-            this.btnQueryMethod.TabIndex = 4;
-            this.btnQueryMethod.Text = "Execute";
-            this.btnQueryMethod.Click += new System.EventHandler(this.btnQueryMethod_Click);
+            this.buttonExecuteDW.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonExecuteDW.Location = new System.Drawing.Point(187, 204);
+            this.buttonExecuteDW.Name = "buttonExecuteDW";
+            this.buttonExecuteDW.Size = new System.Drawing.Size(87, 24);
+            this.buttonExecuteDW.TabIndex = 4;
+            this.buttonExecuteDW.Text = "Execute";
+            this.buttonExecuteDW.Click += new System.EventHandler(this.buttonExecuteDW_Click);
             // 
             // pnlReboot
             // 
@@ -848,18 +848,18 @@ namespace WMI_Test
             this.rbIndividual.UseVisualStyleBackColor = true;
             this.rbIndividual.CheckedChanged += new System.EventHandler(this.rbIndividual_CheckedChanged);
             // 
-            // cmbWMIMethodsList
+            // comboBoxMethodsDW
             // 
-            this.cmbWMIMethodsList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbWMIMethodsList.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbWMIMethodsList.IntegralHeight = false;
-            this.cmbWMIMethodsList.Location = new System.Drawing.Point(114, 25);
-            this.cmbWMIMethodsList.MaxDropDownItems = 9;
-            this.cmbWMIMethodsList.Name = "cmbWMIMethodsList";
-            this.cmbWMIMethodsList.Size = new System.Drawing.Size(160, 21);
-            this.cmbWMIMethodsList.Sorted = true;
-            this.cmbWMIMethodsList.TabIndex = 3;
-            this.cmbWMIMethodsList.SelectedIndexChanged += new System.EventHandler(this.cmbWMIMethodsList_SelectedIndexChanged);
+            this.comboBoxMethodsDW.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxMethodsDW.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.comboBoxMethodsDW.IntegralHeight = false;
+            this.comboBoxMethodsDW.Location = new System.Drawing.Point(114, 25);
+            this.comboBoxMethodsDW.MaxDropDownItems = 9;
+            this.comboBoxMethodsDW.Name = "comboBoxMethodsDW";
+            this.comboBoxMethodsDW.Size = new System.Drawing.Size(160, 21);
+            this.comboBoxMethodsDW.Sorted = true;
+            this.comboBoxMethodsDW.TabIndex = 3;
+            this.comboBoxMethodsDW.SelectedIndexChanged += new System.EventHandler(this.comboBoxMethodsDW_SelectedIndexChanged);
             // 
             // label11
             // 
@@ -1014,9 +1014,9 @@ namespace WMI_Test
             // 
             // groupBoxConnect
             // 
-            this.groupBoxConnect.Controls.Add(this.lblDriverWMIConnectStatus);
-            this.groupBoxConnect.Controls.Add(this.btnConnectWMIDriver);
-            this.groupBoxConnect.Controls.Add(this.txtHostIP);
+            this.groupBoxConnect.Controls.Add(this.labelConnetionStatusDW);
+            this.groupBoxConnect.Controls.Add(this.buttonConnectDW);
+            this.groupBoxConnect.Controls.Add(this.textBoxIPAddressDW);
             this.groupBoxConnect.Controls.Add(this.label3);
             this.groupBoxConnect.Location = new System.Drawing.Point(8, 6);
             this.groupBoxConnect.Name = "groupBoxConnect";
@@ -1025,36 +1025,36 @@ namespace WMI_Test
             this.groupBoxConnect.TabStop = false;
             this.groupBoxConnect.Text = "Target Computer";
             // 
-            // lblDriverWMIConnectStatus
+            // labelConnetionStatusDW
             // 
-            this.lblDriverWMIConnectStatus.AutoSize = true;
-            this.lblDriverWMIConnectStatus.ForeColor = System.Drawing.Color.Blue;
-            this.lblDriverWMIConnectStatus.Location = new System.Drawing.Point(284, 55);
-            this.lblDriverWMIConnectStatus.Name = "lblDriverWMIConnectStatus";
-            this.lblDriverWMIConnectStatus.Size = new System.Drawing.Size(79, 13);
-            this.lblDriverWMIConnectStatus.TabIndex = 14;
-            this.lblDriverWMIConnectStatus.Text = "Not Connected";
-            this.lblDriverWMIConnectStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labelConnetionStatusDW.AutoSize = true;
+            this.labelConnetionStatusDW.ForeColor = System.Drawing.Color.Blue;
+            this.labelConnetionStatusDW.Location = new System.Drawing.Point(284, 55);
+            this.labelConnetionStatusDW.Name = "labelConnetionStatusDW";
+            this.labelConnetionStatusDW.Size = new System.Drawing.Size(79, 13);
+            this.labelConnetionStatusDW.TabIndex = 14;
+            this.labelConnetionStatusDW.Text = "Not Connected";
+            this.labelConnetionStatusDW.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // btnConnectWMIDriver
+            // buttonConnectDW
             // 
-            this.btnConnectWMIDriver.Location = new System.Drawing.Point(278, 13);
-            this.btnConnectWMIDriver.Name = "btnConnectWMIDriver";
-            this.btnConnectWMIDriver.Size = new System.Drawing.Size(88, 26);
-            this.btnConnectWMIDriver.TabIndex = 1;
-            this.btnConnectWMIDriver.Text = "Connect";
-            this.btnConnectWMIDriver.UseVisualStyleBackColor = true;
-            this.btnConnectWMIDriver.Click += new System.EventHandler(this.btnConnectWMIDriver_Click);
+            this.buttonConnectDW.Location = new System.Drawing.Point(278, 13);
+            this.buttonConnectDW.Name = "buttonConnectDW";
+            this.buttonConnectDW.Size = new System.Drawing.Size(88, 26);
+            this.buttonConnectDW.TabIndex = 1;
+            this.buttonConnectDW.Text = "Connect";
+            this.buttonConnectDW.UseVisualStyleBackColor = true;
+            this.buttonConnectDW.Click += new System.EventHandler(this.buttonConnectDW_Click);
             // 
-            // txtHostIP
+            // textBoxIPAddressDW
             // 
-            this.txtHostIP.BackColor = System.Drawing.Color.White;
-            this.txtHostIP.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtHostIP.Location = new System.Drawing.Point(112, 16);
-            this.txtHostIP.Name = "txtHostIP";
-            this.txtHostIP.Size = new System.Drawing.Size(160, 20);
-            this.txtHostIP.TabIndex = 0;
-            this.txtHostIP.Text = "localhost";
+            this.textBoxIPAddressDW.BackColor = System.Drawing.Color.White;
+            this.textBoxIPAddressDW.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.textBoxIPAddressDW.Location = new System.Drawing.Point(112, 16);
+            this.textBoxIPAddressDW.Name = "textBoxIPAddressDW";
+            this.textBoxIPAddressDW.Size = new System.Drawing.Size(160, 20);
+            this.textBoxIPAddressDW.TabIndex = 0;
+            this.textBoxIPAddressDW.Text = "localhost";
             // 
             // label3
             // 
@@ -1074,9 +1074,9 @@ namespace WMI_Test
             this.tabControlWMITest.Size = new System.Drawing.Size(1000, 890);
             this.tabControlWMITest.TabIndex = 0;
             // 
-            // openFileDialogAttribMetaFile
+            // ofdAtribMeta
             // 
-            this.openFileDialogAttribMetaFile.Title = "Browse for a Atribute Meta File";
+            this.ofdAtribMeta.Title = "Browse for a Atribute Meta File";
             // 
             // DriverWMITestApp
             // 
@@ -1165,29 +1165,29 @@ namespace WMI_Test
         private System.Windows.Forms.SaveFileDialog saveFileDialogMain;
         private System.Windows.Forms.TabPage tabPageDriverWMITest;
         private System.Windows.Forms.GroupBox groupBoxOutput;
-        private System.Windows.Forms.CheckBox chkPNPEventsCapture;
+        private System.Windows.Forms.CheckBox checkBoxDW;
         private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Button button5;
         private System.Windows.Forms.TextBox textBoxManagementDataDW;
         private System.Windows.Forms.GroupBox groupBoxQuery;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Button btnQueryProperty;
-        private System.Windows.Forms.ListBox lstWMIPorpertyList;
+        private System.Windows.Forms.Button buttonGetPropertyDW;
+        private System.Windows.Forms.ListBox listBoxPropertiesDW;
         private System.Windows.Forms.GroupBox groupBoxExecDW;
         public System.Windows.Forms.ListBox listBoxDW;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button btnQueryMethod;
-        internal System.Windows.Forms.ComboBox cmbWMIMethodsList;
+        private System.Windows.Forms.Button buttonExecuteDW;
+        internal System.Windows.Forms.ComboBox comboBoxMethodsDW;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.GroupBox groupBoxConnect;
-        private System.Windows.Forms.Label lblDriverWMIConnectStatus;
-        private System.Windows.Forms.Button btnConnectWMIDriver;
-        private System.Windows.Forms.TextBox txtHostIP;
+        private System.Windows.Forms.Label labelConnetionStatusDW;
+        private System.Windows.Forms.Button buttonConnectDW;
+        private System.Windows.Forms.TextBox textBoxIPAddressDW;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TabControl tabControlWMITest;
         private System.Windows.Forms.TextBox textBoxEvents;
-        private System.Windows.Forms.CheckBox chkAutoSwitchHostMode;
+        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Panel pnlReboot;
         private System.Windows.Forms.RadioButton rbGroup;
         private System.Windows.Forms.RadioButton rbIndividual;
@@ -1203,7 +1203,7 @@ namespace WMI_Test
         private System.Windows.Forms.Panel pnlAtributeMeta;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtAtribMetaPath;
-        private System.Windows.Forms.OpenFileDialog openFileDialogAttribMetaFile;
+        private System.Windows.Forms.OpenFileDialog ofdAtribMeta;
         private System.Windows.Forms.Button btnBrowseAtribMeta;
         private System.Windows.Forms.Panel pnlScannerCapability;
         private System.Windows.Forms.Label label7;

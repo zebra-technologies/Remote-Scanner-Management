@@ -28,31 +28,31 @@ namespace WMI_Test
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnAccept = new System.Windows.Forms.Button();
-            this.btnClear = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.labelInParamHelp = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // btnAccept
+            // button1
             // 
-            this.btnAccept.Location = new System.Drawing.Point(40, 215);
-            this.btnAccept.Name = "btnAccept";
-            this.btnAccept.Size = new System.Drawing.Size(75, 23);
-            this.btnAccept.TabIndex = 1;
-            this.btnAccept.Text = "OK";
-            this.btnAccept.UseVisualStyleBackColor = true;
-            this.btnAccept.Click += new System.EventHandler(this.btnAccept_Click);
+            this.button1.Location = new System.Drawing.Point(40, 215);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "OK";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // btnClear
+            // button2
             // 
-            this.btnClear.Location = new System.Drawing.Point(192, 215);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(75, 23);
-            this.btnClear.TabIndex = 2;
-            this.btnClear.Text = "Cancel";
-            this.btnClear.UseVisualStyleBackColor = true;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            this.button2.Location = new System.Drawing.Point(192, 215);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "Cancel";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // richTextBox1
             // 
@@ -77,8 +77,8 @@ namespace WMI_Test
             this.ClientSize = new System.Drawing.Size(292, 250);
             this.Controls.Add(this.labelInParamHelp);
             this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.btnClear);
-            this.Controls.Add(this.btnAccept);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
             this.Name = "InParamsDlg";
             this.Text = "Input";
             this.ResumeLayout(false);
@@ -88,8 +88,8 @@ namespace WMI_Test
 
         #endregion
 
-        private System.Windows.Forms.Button btnAccept;
-        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Label labelInParamHelp;
     }

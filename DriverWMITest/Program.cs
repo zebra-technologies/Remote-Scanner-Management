@@ -15,8 +15,8 @@ namespace WMI_Test
            Application.EnableVisualStyles();
            Application.SetCompatibleTextRenderingDefault(false);
 
-           DriverWMITestApp.objAppRef = new DriverWMITestApp();
-           Application.Run(DriverWMITestApp.objAppRef);
+           DriverWMITestApp.instance = new DriverWMITestApp();
+           Application.Run(DriverWMITestApp.instance);
         }
     }
 }

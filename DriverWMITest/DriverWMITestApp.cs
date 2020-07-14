@@ -14,13 +14,6 @@ namespace WMI_Test
 {
     public partial class DriverWMITestApp : Form
     {
-        private WqlEventQuery wmiEventQuery;
-        
-        private ManagementEventWatcher mgmtEventWatcher;
-
-        private RSMDriverManagement rsmDriverManagementObject;
-
-        // Scanner host modes
         const String IBMHID = "XUA-45001-1";
         const String HIDKB = "XUA-45001-3";
         const String SNAPI_With_Iamging = "XUA-45001-9";
@@ -29,50 +22,38 @@ namespace WMI_Test
         const String USB_CDC = "XUA-45001-11";
         const String USB_SSI_CDC = "XUA-45001-14";
 
-        // Event handlers
+        private RSMDriverManagement rsmDriverManagementObject;
         private ScannerPNPEventHandler pnpEventHandler;
-        public static EventArrivedEventArgs scannerPNPEventArg;
-        private ManualResetEvent pollEvent = new ManualResetEvent(false);
-
-        static public DriverWMITestApp objAppRef;
+        static public DriverWMITestApp instance;
         public String hostAutoSwitchingEnabled = String.Empty;
-
-        public bool bIsDisplay = false;
-        public String[] inparams = new String[10];
-        internal int iSelectedIndex;
-        internal String strSelectedIndexValue;
 
         public DriverWMITestApp()
         {
             InitializeComponent();            
         }
 
-        /// <summary>
-        /// Init Driver WMI
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnConnectWMIDriver_Click(object sender, EventArgs e)
+        private void buttonConnectDW_Click(object sender, EventArgs e)
         {
-            lblDriverWMIConnectStatus.Text = String.Empty;
+            labelConnetionStatusDW.Text = String.Empty;
          
             ConnectionOptions options = new ConnectionOptions();
             options.Authentication = AuthenticationLevel.Packet;
             options.Impersonation = ImpersonationLevel.Impersonate;
             options.EnablePrivileges = true;
 
-            lstWMIPorpertyList.Items.Clear();
-            txtHostIP.Text = txtHostIP.Text.Trim().Equals("") ? "." : txtHostIP.Text.Trim();
+            listBoxPropertiesDW.Items.Clear();
+            textBoxIPAddressDW.Text = textBoxIPAddressDW.Text.Trim().Equals("") ? "." : textBoxIPAddressDW.Text.Trim();
 
             rsmDriverManagementObject = new RSMDriverManagement();
-            rsmDriverManagementObject.mgmtScope = new ManagementScope("\\\\" + txtHostIP.Text + "\\root\\CIMV2", options);
+            rsmDriverManagementObject.mgmtScope = new ManagementScope("\\\\" + textBoxIPAddressDW.Text + "\\root\\CIMV2", options);
 
             RSMDriverManagement serviceManagementObject = new RSMDriverManagement();
-            serviceManagementObject.mgmtScope = new ManagementScope("\\\\" + txtHostIP.Text + "\\root\\CIMV2", options);
+            serviceManagementObject.mgmtScope = new ManagementScope("\\\\" + textBoxIPAddressDW.Text + "\\root\\CIMV2", options);
+
 
             try
             {
-                lblDriverWMIConnectStatus.Text = String.Empty;
+                labelConnetionStatusDW.Text = String.Empty;
                 rsmDriverManagementObject.mgmtScope.Connect();
                 serviceManagementObject.mgmtScope.Connect();
             }
@@ -84,7 +65,7 @@ namespace WMI_Test
                 + "- Firewall group policies of remote host may not be configured";
                 string errcap = "Connection Error";
                 MessageBox.Show(errmsg, errcap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                lblDriverWMIConnectStatus.Text = "Not Connected";
+                labelConnetionStatusDW.Text = "Not Connected";
                 this.Update();
                 Cursor.Current = Cursors.Arrow;
                 return;
@@ -117,33 +98,32 @@ namespace WMI_Test
                     hostAutoSwitchingEnabled = mo["HostAutoSwitchingEnabled"].ToString();
                 }
                 
-                lblDriverWMIConnectStatus.Text = "Connected";
+                labelConnetionStatusDW.Text = "Connected";
                 InitDriverMgmntTabPage();
 
                 if ("TRUE" == hostAutoSwitchingEnabled.ToUpper())
                 {
-                    chkAutoSwitchHostMode.Checked = true;
+                    checkBox1.Checked = true;
                 }
  
             }
             catch (Exception)
             {
-                lblDriverWMIConnectStatus.Text = "Exception occurred. Please retry";
+                labelConnetionStatusDW.Text = "Exception occurred. Please retry";
             }
             Cursor.Current = Cursors.Arrow;
 
-            pnpEventHandler = new ScannerPNPEventHandler(ref objAppRef);
+            pnpEventHandler = new ScannerPNPEventHandler(ref instance);
 
             //Setup to receive ScannerEvent
-            wmiEventQuery = new WqlEventQuery("SELECT * FROM ScannerPNPEvent");
-            mgmtEventWatcher = new ManagementEventWatcher(wmiEventQuery);
-            mgmtEventWatcher.EventArrived += new EventArrivedEventHandler(pnpEventHandler.EventArrived);
+            query = new WqlEventQuery("SELECT * FROM ScannerPNPEvent");
+            watcher = new ManagementEventWatcher(query);
+            watcher.EventArrived += new EventArrivedEventHandler(pnpEventHandler.EventArrived);
             
         }
 
-        /// <summary>
-        /// Scanner PNP event data
-        /// </summary>
+        public static EventArrivedEventArgs scannerPNPEventArg;
+
         public void UpdateOnScannerPNPEvent()
         {
             String scannerClass = scannerPNPEventArg.NewEvent.Properties["__CLASS"].Value.ToString();
@@ -175,74 +155,194 @@ namespace WMI_Test
             textBoxManagementDataDW.Text += "\r\n";            
         }
 
-        /// <summary>
-        /// Method to find the name and type of RSMDriver method parameters 
-        /// </summary>
+        //Method to find the name and type of RSMDriver method parameters
         private void updateParameterList()
         {
             listBoxDW.Items.Clear();
-            ManagementBaseObject inparams = rsmDriverManagementObject.mgmtClass.GetMethodParameters(cmbWMIMethodsList.Text.Trim());
+
+            ManagementBaseObject inparams = rsmDriverManagementObject.mgmtClass.GetMethodParameters(comboBoxMethodsDW.Text.Trim());
 
             if (inparams != null)
             {
-                foreach (PropertyData propertyData in inparams.Properties)
+                foreach (PropertyData md in inparams.Properties)
                 {
-                    listBoxDW.Items.Add(propertyData.Name + "= a value of type : " + propertyData.Type);
+                    listBoxDW.Items.Add(md.Name + "= a value of type : " + md.Type);
                 }
             }
+    // ***************  Tharindu *************************************
+            
+            String selectedMethod = String.Empty;
+            selectedMethod = comboBoxMethodsDW.SelectedItem.ToString();
+                if (selectedMethod == "GetDeviceTopology")
+                {
+                    HideAllPannels();
+                }
+                else if (selectedMethod == "SwitchHostMode")
+                {
+                    HideAllPannels();
+                    pnlSwitchHostMode.Visible = true;
+                    cmbHostMode.SelectedIndex = 0;
+                    txtSwitchHostScannerID.Enabled = true; ;
+                }
+                else if (selectedMethod == "GetScannerCapabilityProfile")
+                {
+                    HideAllPannels();
+                    pnlScannerCapability.Visible = true;
+                }
+                else if (selectedMethod == "RebootScanner")
+                {
+                    HideAllPannels();
+                    pnlReboot.Visible = true;
+                }
+                else if (selectedMethod == "UpdateAttributeMetaFile")
+                {
+                    HideAllPannels();
+                    pnlAtributeMeta.Visible = true;
+                }
+                else if (selectedMethod == "SwitchCDCDevices")
+                {
+                    HideAllPannels();
+                    pnlSwitchHostMode.Visible = true;
+                    txtSwitchHostScannerID.Enabled = false;
+                    cmbHostMode.SelectedIndex = 2;
+                }
+                else
+                {
+                    HideAllPannels();
+                }
+            
 
-            String strSelectedMethod = String.Empty;
-            strSelectedMethod = cmbWMIMethodsList.SelectedItem.ToString();
-            if (strSelectedMethod == "GetDeviceTopology")
+
+        }
+
+        private void HideAllPannels()
+        {
+            pnlReboot.Visible = false;
+            pnlSwitchHostMode.Visible = false;
+            pnlAtributeMeta.Visible = false;
+            pnlScannerCapability.Visible = false;
+        }
+
+   //***************************************************************
+
+        public bool InitDriverMgmntTabPage()
+        {
+            lock (this)
             {
-                HideAllPannels();
+                try
+                {
+                    comboBoxMethodsDW.Items.Clear();
+
+                    rsmDriverManagementObject.mgmtClass = new ManagementClass();
+                    rsmDriverManagementObject.mgmtClass.Scope = rsmDriverManagementObject.mgmtScope;
+                    rsmDriverManagementObject.mgmtClass.Path = new ManagementPath("RSMDriver");
+
+                    // Enumurate RSMDriver Management Class Methods and polutate the "Method" Listbox
+                    foreach (MethodData mm in rsmDriverManagementObject.mgmtClass.Methods)
+                    {
+                        if (mm.Name != "GetScannerCapabilityProfile")
+                        comboBoxMethodsDW.Items.Add(mm.Name);
+                    }
+                    comboBoxMethodsDW.SelectedIndex = 0;    
+
+                    // Enumurate Management class properties and populate the "Properties" Listbox
+                    foreach (PropertyData pp in rsmDriverManagementObject.mgmtClass.Properties)
+                    {
+                        listBoxPropertiesDW.Items.Add(pp.Name);
+                    }
+
+                    groupBoxExecDW.Enabled = true;
+                    groupBoxQuery.Enabled = true;
+                    checkBoxDW.Enabled = true;
+                    textBoxEvents.Enabled = true;
+                    checkBox1.Enabled = true;
+                    
+                    this.Update();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
-            else if (strSelectedMethod == "SwitchHostMode")
+        }
+
+        
+
+        WqlEventQuery query;
+        ManagementEventWatcher watcher;
+
+        private ManualResetEvent pollEvent = new ManualResetEvent(false);        
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxDW.Checked)
             {
-                HideAllPannels();
-                pnlSwitchHostMode.Visible = true;
-                cmbHostMode.SelectedIndex = 0;
-                txtSwitchHostScannerID.Enabled = true; ;
-            }
-            else if (strSelectedMethod == "GetScannerCapabilityProfile")
-            {
-                HideAllPannels();
-                pnlScannerCapability.Visible = true;
-            }
-            else if (strSelectedMethod == "RebootScanner")
-            {
-                HideAllPannels();
-                pnlReboot.Visible = true;
-            }
-            else if (strSelectedMethod == "UpdateAttributeMetaFile")
-            {
-                HideAllPannels();
-                pnlAtributeMeta.Visible = true;
-            }
-            else if (strSelectedMethod == "SwitchCDCDevices")
-            {
-                HideAllPannels();
-                pnlSwitchHostMode.Visible = true;
-                txtSwitchHostScannerID.Enabled = false;
-                cmbHostMode.SelectedIndex = 2;
+                watcher.Start();
             }
             else
             {
-                HideAllPannels();
+                watcher.Stop();
+            }
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            textBoxManagementDataDW.Clear();
+            textBoxEvents.Clear();
+        }
+
+        private void buttonGetPropertyDW_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                String selectedProperty;
+                if (null != listBoxPropertiesDW.SelectedItem)
+                {
+                    selectedProperty = listBoxPropertiesDW.SelectedItem.ToString().Trim();
+                }
+                else
+                {
+                    return;
+                }
+
+                ManagementObjectSearcher searcher =
+                    new ManagementObjectSearcher("root\\CIMV2",
+                    "SELECT * FROM RSMDriver");
+
+
+                foreach (ManagementObject queryObj in searcher.Get())
+                {
+                    textBoxManagementDataDW.AppendText("RSMDriver Instance Property:");
+                    textBoxManagementDataDW.AppendText(selectedProperty);
+                    textBoxManagementDataDW.AppendText(":");
+                    if (null != queryObj[selectedProperty])
+                    {
+                        textBoxManagementDataDW.AppendText(queryObj[selectedProperty].ToString());
+                    }
+                    textBoxManagementDataDW.AppendText("\r\n");
+                }
+            }
+            catch (ManagementException ex)
+            {
+                MessageBox.Show("An error occurred while querying for WMI data: " + ex.Message);
             }
         }
         
-        /// <summary>
-        /// Query GetDeviceTopology
-        /// </summary>
         private void ExecuteGetDeviceTopology()
         {
             try
             {
-                ManagementObject mgmtObject = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
+                // no method in-parameters to define
                 // Execute the method and obtain the return values.
-                ManagementBaseObject outParams = mgmtObject.InvokeMethod("GetDeviceTopology", null, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("GetDeviceTopology", null, null);
                 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters:");
@@ -252,33 +352,33 @@ namespace WMI_Test
                 textBoxManagementDataDW.AppendText("ReturnValue: \r\n----------------------------------\r\n" + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
         }
 
-        /// <summary>
-        /// Generate a formated XMl from a unformated XML
-        /// </summary>
-        /// <param name="xml">Unformated XML</param>
-        /// <returns>Formated XMl</returns>
+/// <summary> (Tharindu)
+/// Generate a formated XMl from a unformated XML
+/// </summary>
+/// <param name="xml">Unformated XML</param>
+/// <returns>Formated XMl</returns>
         private static string IndentXMLString(string xml)
         {
             string outXml = string.Empty;
-            MemoryStream memoryStream = new MemoryStream();
-            XmlTextWriter xmlTextWriter = new XmlTextWriter(memoryStream, Encoding.Unicode);
-            XmlDocument xmlDoc = new XmlDocument();
+            MemoryStream ms = new MemoryStream();
+            XmlTextWriter xtw = new XmlTextWriter(ms, Encoding.Unicode);
+            XmlDocument doc = new XmlDocument();
 
             try
             {
-                xmlDoc.LoadXml(xml);
-                xmlTextWriter.Formatting = Formatting.Indented;
-                xmlDoc.WriteContentTo(xmlTextWriter);
-                xmlTextWriter.Flush();
+                doc.LoadXml(xml);
+                xtw.Formatting = Formatting.Indented;
+                doc.WriteContentTo(xtw);
+                xtw.Flush();
 
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                StreamReader sr = new StreamReader(memoryStream);
+                ms.Seek(0, SeekOrigin.Begin);
+                StreamReader sr = new StreamReader(ms);
                 return sr.ReadToEnd();
             }
             catch (Exception ex)
@@ -288,22 +388,30 @@ namespace WMI_Test
             }
         }
 
-        /// <summary>
-        /// Query SwitchCDCDevices
-        /// </summary>
         private void ExecuteSwitcCDCDevices()
         {
             try
             {
-                ManagementObject classInstance = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
                 // Obtain in-parameters for the method
-                ManagementBaseObject inParams = classInstance.GetMethodParameters("SwitchCDCDevices");
+                ManagementBaseObject inParams =
+                    classInstance.GetMethodParameters("SwitchCDCDevices");
+
+
 
                 inParams["IsPermanentChange"] = chkIsPermanant.Checked;
                 inParams["IsSilentSwitch"] = chkIsSilentSwitch.Checked;
 
                 StringBuilder sbSwitchingScanners = new StringBuilder();
+                //sbSwitchingScanners.Append("<scanner><scannerID>");
+                //sbSwitchingScanners.Append(txtSwitchHostScannerID.Text);
+                //sbSwitchingScanners.Append("</scannerID></scanner>");
+
+                //inParams["ScannerIdentity"] = sbSwitchingScanners.ToString();
 
                 switch (cmbHostMode.SelectedIndex)
                 {
@@ -330,8 +438,11 @@ namespace WMI_Test
                         break;
                 }
 
+                //******************************************************/
+
                 // Execute the method and obtain the return values.
-                ManagementBaseObject outParams = classInstance.InvokeMethod("SwitchCDCDevices", inParams, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("SwitchCDCDevices", inParams, null);
 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters:");
@@ -339,23 +450,26 @@ namespace WMI_Test
                 textBoxManagementDataDW.AppendText("ReturnValue: " + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
         }
 
-        /// <summary>
-        /// Query SwitchHostMode
-        /// </summary>
         private void ExecuteSwitchHostMode()
         {
             try
             {
-                ManagementObject mgmtObject = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
                 // Obtain in-parameters for the method
-                ManagementBaseObject inParams = mgmtObject.GetMethodParameters("SwitchHostMode");
+                ManagementBaseObject inParams =
+                    classInstance.GetMethodParameters("SwitchHostMode");
+
+
 
                inParams["IsPermanentChange"] = chkIsPermanant.Checked;
                inParams["IsSilentSwitch"] = chkIsSilentSwitch.Checked;
@@ -390,10 +504,13 @@ namespace WMI_Test
                    case 6:
                        inParams["TargetHostMode"] = USB_SSI_CDC;
                        break;
-                }
+               }
+
+            //******************************************************/
                 
                 // Execute the method and obtain the return values.
-                ManagementBaseObject outParams = mgmtObject.InvokeMethod("SwitchHostMode", inParams, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("SwitchHostMode", inParams, null);
 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters:");
@@ -401,28 +518,37 @@ namespace WMI_Test
                 textBoxManagementDataDW.AppendText("ReturnValue: " + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
         }
 
-        /// <summary>
-        /// Query GetScannerCapabilityProfile
-        /// </summary>
         private void ExecuteGetScannerCapabilityProfile()
         {
             try
             {
-                ManagementObject classInstance = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
                 // Obtain in-parameters for the method
-                ManagementBaseObject inParams = classInstance.GetMethodParameters("GetScannerCapabilityProfile");
+                ManagementBaseObject inParams =
+                    classInstance.GetMethodParameters("GetScannerCapabilityProfile");
+
+                // Add the input parameters.
+                //inParams["ScannerIdentity"] = inparams[0].Trim();
+
+                //************ Tharindu *************************************
 
                 inParams["ScannerIdentity"] = txtGetCapaScannerID.Text;
 
+
+                //***********************************************************
                 // Execute the method and obtain the return values.
-                ManagementBaseObject outParams = classInstance.InvokeMethod("GetScannerCapabilityProfile", inParams, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("GetScannerCapabilityProfile", inParams, null);
 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters[GetScannerCapabilityProfile]:");
@@ -430,23 +556,24 @@ namespace WMI_Test
                 textBoxManagementDataDW.AppendText("ReturnValue: " + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
         }
 
-        /// <summary>
-        /// Query RebootScanner
-        /// </summary>
         private void ExecuteRebootScanner()
         {
             try
             {
-                ManagementObject mgmtObject = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
                 // Obtain in-parameters for the method
-                ManagementBaseObject inParams = mgmtObject.GetMethodParameters("RebootScanner");
+                ManagementBaseObject inParams = classInstance.GetMethodParameters("RebootScanner");
+
  
                 StringBuilder sbRebootScanners = new StringBuilder();
                 if (rbIndividual.Checked)
@@ -454,178 +581,95 @@ namespace WMI_Test
                     sbRebootScanners.Append("<scanner><scannerID>");
                     sbRebootScanners.Append(txtScannerID.Text);
                     sbRebootScanners.Append("</scannerID></scanner>");
+                    
                 }
                 if (rbGroup.Checked)
                 {
                     sbRebootScanners.Append("<scanner><group>*</group></scanner>");
+
                 }
                 inParams["ScannerIdentity"] = sbRebootScanners.ToString();
+
  
                 // Execute the method and obtain the return values.
-                ManagementBaseObject outParams = mgmtObject.InvokeMethod("RebootScanner", inParams, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("RebootScanner", inParams, null);
 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters[RebootScanner]:");
                 textBoxManagementDataDW.AppendText("ReturnValue: " + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
         }
 
-        /// <summary>
-        /// Query UpdateAttributeMetaFile
-        /// </summary>
         private void ExecuteUpdateAttributeMetaFile()
         {
             try
             {
-                ManagementObject mgmtObject = new ManagementObject("root\\CIMV2", "RSMDriver.Version='2.0.0.1'", null);
+                ManagementObject classInstance =
+                    new ManagementObject("root\\CIMV2",
+                    "RSMDriver.Version='2.0.0.1'",
+                    null);
 
                 // Obtain in-parameters for the method
-                ManagementBaseObject inParams = mgmtObject.GetMethodParameters("UpdateAttributeMetaFile");
+                ManagementBaseObject inParams = classInstance.GetMethodParameters("UpdateAttributeMetaFile");
                 inParams["AttributeMetaFilePath"] = txtAtribMetaPath.Text;
 
-                ManagementBaseObject outParams = mgmtObject.InvokeMethod("UpdateAttributeMetaFile", inParams, null);
+                ManagementBaseObject outParams =
+                    classInstance.InvokeMethod("UpdateAttributeMetaFile", inParams, null);
 
                 // List outParams
                 textBoxManagementDataDW.AppendText("Out parameters[UpdateAttributeMetaFile]:");
                 textBoxManagementDataDW.AppendText("ReturnValue: " + outParams["ReturnValue"]);
                 textBoxManagementDataDW.AppendText("\r\n");
             }
-            catch (ManagementException ex)
+            catch (ManagementException err)
             {
-                MessageBox.Show(this, "An error occurred while trying to execute the WMI method: " + ex.Message);
+                MessageBox.Show("An error occurred while trying to execute the WMI method: " + err.Message);
             }
+
         }
 
-        /// <summary>
-        /// Init UI controls
-        /// </summary>
-        /// <returns></returns>
-        public bool InitDriverMgmntTabPage()
+        private void buttonExecuteDW_Click(object sender, EventArgs e)
         {
-            lock (this)
-            {
-                try
-                {
-                    cmbWMIMethodsList.Items.Clear();
-
-                    rsmDriverManagementObject.mgmtClass = new ManagementClass();
-                    rsmDriverManagementObject.mgmtClass.Scope = rsmDriverManagementObject.mgmtScope;
-                    rsmDriverManagementObject.mgmtClass.Path = new ManagementPath("RSMDriver");
-
-                    // Enumurate RSMDriver Management Class Methods and polutate the "Method" Listbox
-                    foreach (MethodData mm in rsmDriverManagementObject.mgmtClass.Methods)
-                    {
-                        if (mm.Name != "GetScannerCapabilityProfile")
-                            cmbWMIMethodsList.Items.Add(mm.Name);
-                    }
-                    cmbWMIMethodsList.SelectedIndex = 0;
-
-                    // Enumurate Management class properties and populate the "Properties" Listbox
-                    foreach (PropertyData pp in rsmDriverManagementObject.mgmtClass.Properties)
-                    {
-                        lstWMIPorpertyList.Items.Add(pp.Name);
-                    }
-
-                    groupBoxExecDW.Enabled = true;
-                    groupBoxQuery.Enabled = true;
-                    chkPNPEventsCapture.Enabled = true;
-                    textBoxEvents.Enabled = true;
-                    chkAutoSwitchHostMode.Enabled = true;
-
-                    this.Update();
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Query WMI properties event 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnQueryProperty_Click(object sender, EventArgs e)
-        {
+            String selectedMethod=String.Empty;
             try
             {
-                String selectedProperty;
-                if (null != lstWMIPorpertyList.SelectedItem)
+                if (null != comboBoxMethodsDW.SelectedItem)
                 {
-                    selectedProperty = lstWMIPorpertyList.SelectedItem.ToString().Trim();
-                }
-                else
-                {
-                    return;
-                }
-
-                ManagementObjectSearcher mgmtObjectSearch = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM RSMDriver");
-
-                foreach (ManagementObject queryObj in mgmtObjectSearch.Get())
-                {
-                    textBoxManagementDataDW.AppendText("RSMDriver Instance Property:");
-                    textBoxManagementDataDW.AppendText(selectedProperty);
-                    textBoxManagementDataDW.AppendText(":");
-                    if (null != queryObj[selectedProperty])
-                    {
-                        textBoxManagementDataDW.AppendText(queryObj[selectedProperty].ToString());
-                    }
-                    textBoxManagementDataDW.AppendText("\r\n");
-                }
-            }
-            catch (ManagementException ex)
-            {
-                MessageBox.Show(this, "An error occurred while querying for WMI data: " + ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Query WMI methods event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnQueryMethod_Click(object sender, EventArgs e)
-        {
-            String strWMIMethodSelected = String.Empty;
-            try
-            {
-                if (cmbWMIMethodsList.SelectedItem != null)
-                {
-                    strWMIMethodSelected = cmbWMIMethodsList.SelectedItem.ToString();
+                    selectedMethod = comboBoxMethodsDW.SelectedItem.ToString();
                 }
                 else
                 {
                     MessageBox.Show("Enter input");
                 }
 
-                if (strWMIMethodSelected == "GetDeviceTopology")
+
+                if (selectedMethod == "GetDeviceTopology")
                 {
                     ExecuteGetDeviceTopology();
                 }
-                else if (strWMIMethodSelected == "SwitchHostMode")
+                else if (selectedMethod == "SwitchHostMode")
                 {
                     ExecuteSwitchHostMode();
                 }
-                else if (strWMIMethodSelected == "SwitchCDCDevices")
+                else if (selectedMethod == "SwitchCDCDevices")
                 {
                     ExecuteSwitcCDCDevices();
                 }
-                else if (strWMIMethodSelected == "GetScannerCapabilityProfile")
+                else if (selectedMethod == "GetScannerCapabilityProfile")
                 {
                     ExecuteGetScannerCapabilityProfile();
                 }
-                else if (strWMIMethodSelected == "RebootScanner")
+                else if (selectedMethod == "RebootScanner")
                 {
                     ExecuteRebootScanner();
                 }
-                else if (strWMIMethodSelected == "UpdateAttributeMetaFile")
+                else if (selectedMethod == "UpdateAttributeMetaFile")
                 {
                     ExecuteUpdateAttributeMetaFile();
                 }
@@ -636,44 +680,48 @@ namespace WMI_Test
             }
         }
 
-        /// <summary>
-        /// Selected WMI method changed event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cmbWMIMethodsList_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxMethodsDW_SelectedIndexChanged(object sender, EventArgs e)
         {
             updateParameterList();
         }
+
+        internal int selectedIndex;
+        internal String selectedIndexval;
 
         private void listBoxDW_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (null != this.listBoxDW.SelectedItem)
             {
-                iSelectedIndex = this.listBoxDW.SelectedIndex;
-                strSelectedIndexValue = this.listBoxDW.SelectedItem.ToString();
+              //  IsDisplay = true;
+                selectedIndex = this.listBoxDW.SelectedIndex;
+                selectedIndexval = this.listBoxDW.SelectedItem.ToString();
                 this.listBoxDW.SelectedItem = null;
                 InParamsDlg inparamDlg = new InParamsDlg(this);
+                //inparamDlg.Show();
+               // inparamDlg.formParent = this;
                 inparamDlg.ShowDialog();
+                //inparamDlg.Show();
             }          
         }
 
-        /// <summary>
-        /// Scanner host mode auto switching event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void chkAutoSwitchHostMode_CheckedChanged(object sender, EventArgs e)
+        public bool IsDisplay = false;
+
+        public String[] inparams = new String[10];
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
         {
             try
             {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM RSMDriver");
+                ManagementObjectSearcher searcher =
+                    new ManagementObjectSearcher("root\\CIMV2",
+                    "SELECT * FROM RSMDriver");
+
                 String selectedProperty = "HostAutoSwitchingEnabled";
                 Boolean setTrue = true;
 
                 foreach (ManagementObject queryObj in searcher.Get())
                 {
-                    if (chkAutoSwitchHostMode.Checked)
+                    if (checkBox1.Checked)
                     {
                         queryObj.SetPropertyValue(selectedProperty, setTrue);
                         queryObj.Put();
@@ -688,78 +736,34 @@ namespace WMI_Test
             }
             catch (ManagementException ex)
             {
-                MessageBox.Show(this, "An error occurred while querying for WMI data: " + ex.Message);
+                MessageBox.Show("An error occurred while querying for WMI data: " + ex.Message);
             }
         }
 
-        /// <summary>
-        /// Scanner PNPN events lsitner event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void chkPNPEventsCapture_CheckedChanged(object sender, EventArgs e)
-        {
-            if (chkPNPEventsCapture.Checked)
-            {
-                mgmtEventWatcher.Start();
-            }
-            else
-            {
-                mgmtEventWatcher.Stop();
-            }
-        }
-
-        /// <summary>
-        /// Main form load event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // *********************** Tharindu ***************************************
         private void DriverWMITestApp_Load(object sender, EventArgs e)
         {
             HideAllPannels();
         }
 
-        /// <summary>
-        /// Enable scanner ID text box for individual scanner event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void rbIndividual_CheckedChanged(object sender, EventArgs e)
         {
-            txtScannerID.Enabled = rbIndividual.Checked ? true : false;
+            if (rbIndividual.Checked)
+            {
+                txtScannerID.Enabled = true;
+            }
+            else
+            {
+                txtScannerID.Enabled = false;
+            }
         }
 
-        /// <summary>
-        /// Select attribute meta file event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnBrowseAtribMeta_Click(object sender, EventArgs e)
         {
-            openFileDialogAttribMetaFile.ShowDialog();
-            txtAtribMetaPath.Text = openFileDialogAttribMetaFile.FileName;
-        }
+            ofdAtribMeta.ShowDialog();
+            txtAtribMetaPath.Text = ofdAtribMeta.FileName;
 
-        /// <summary>
-        /// Clear the output results event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            textBoxManagementDataDW.Clear();
-            textBoxEvents.Clear();
         }
-
-        /// <summary>
-        /// Hide all UI panels
-        /// </summary>
-        private void HideAllPannels()
-        {
-            pnlReboot.Visible = false;
-            pnlSwitchHostMode.Visible = false;
-            pnlAtributeMeta.Visible = false;
-            pnlScannerCapability.Visible = false;
-        }
+        // *********************************************************************
      }
 }

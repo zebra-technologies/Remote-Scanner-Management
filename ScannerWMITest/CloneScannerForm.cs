@@ -226,47 +226,47 @@ namespace WMI_Tester
 
 		private void cmdSASM_Click(object sender, System.EventArgs e)
 		{
-			for (int index = 0; index < chkLstScanners.Items.Count; index++)
+			for (int i=0;i<chkLstScanners.Items.Count;i++)
 			{
-				if (chkLstScanners.Items[index].ToString().IndexOf(strWizModel)==0)
+				if (chkLstScanners.Items[i].ToString().IndexOf(strWizModel)==0)
 				{
-					chkLstScanners.SetItemChecked(index,true);
+					chkLstScanners.SetItemChecked(i,true);
 				}
 				else
 				{
-					chkLstScanners.SetItemChecked(index,false);
+					chkLstScanners.SetItemChecked(i,false);
 				}
 			}
 		}
 
 		private void cmdSAAM_Click(object sender, System.EventArgs e)
 		{
-			for (int index = 0; index < chkLstScanners.Items.Count; index++)
+			for (int i=0;i<chkLstScanners.Items.Count;i++)
 			{
-				chkLstScanners.SetItemChecked(index,true);
+				chkLstScanners.SetItemChecked(i,true);
 			}
 		}
 
 		private void cmdCA_Click(object sender, System.EventArgs e)
 		{
-            for (int index = 0; index < chkLstScanners.Items.Count; index++)
+			for (int i=0;i<chkLstScanners.Items.Count;i++)
 			{
-                chkLstScanners.SetItemChecked(index, false);
+				chkLstScanners.SetItemChecked(i,false);
 			}
 		}
 
 		private void cmdStartClone_Click(object sender, System.EventArgs e)
 		{
 			btnClose.Enabled=false;
-			for (int index = 0; index < chkLstScanners.Items.Count; index++)
+			for (int i=0;i<chkLstScanners.Items.Count;i++)
 			{
-				if (chkLstScanners.GetItemChecked(index)==true)
+				if (chkLstScanners.GetItemChecked(i)==true)
 				{
-					intCurrentScan = index;
-					Thread threadClone = new Thread(new ThreadStart(CloneManagementThread ));
-					threadClone.Name = "Clone_" + index.ToString();
-					threadClone.Start();
-					while (intCurrentScan == index)
+					intCurrentScan=i;
+					Thread clnThread=new Thread(new ThreadStart(cloneThread ));
+					clnThread.Name="Clone_" + i.ToString();
+					clnThread.Start();
+					while (intCurrentScan==i)
 					{
 						Thread.Sleep(10);
 					}
@@ -275,12 +275,12 @@ namespace WMI_Tester
 			btnClose.Enabled=true;
 		}
 
-        private void UpdateManagementResults(string strIn)
+        private void upDateMgmt(string strIn)
         {
             if (this.txtOutMgmt.InvokeRequired)
             {
-                SetTextCallback callback = new SetTextCallback(UpdateManagementResults);
-                this.Invoke(callback, new object[] { strIn });
+                SetTextCallback d = new SetTextCallback(upDateMgmt);
+                this.Invoke(d, new object[] { strIn });
             }
             else
             {
@@ -288,7 +288,7 @@ namespace WMI_Tester
             }
         }
 
-		private void CloneManagementThread()
+		private void cloneThread()
 		{
 			string strCurItem=chkLstScanners.Items[intCurrentScan].ToString();
 			string strWizPartNumber=strCurItem.Substring(0,strCurItem.IndexOf("\\"));
@@ -296,41 +296,52 @@ namespace WMI_Tester
 			intCurrentScan++;
 			try
 			{
-				UpdateManagementResults("\r\n" + "Start Cloning: " + strWizSerialNumber + " on Thread " + Thread.CurrentThread.Name);
-                ManagementObject mgmtObject = new ManagementObject();
-                mgmtObject.Scope = mgmtScope;
-                mgmtObject.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strWizPartNumber + "',SerialNumber='" + strWizSerialNumber + "'");
+				upDateMgmt("\r\n" + "Start Cloning: " + strWizSerialNumber + " on Thread " + Thread.CurrentThread.Name);
+                ManagementObject o = new ManagementObject();
+                o.Scope = mgmtScope;
+                o.Path = new ManagementPath("Symbol_BarcodeScanner.PartNumber='" + strWizPartNumber + "',SerialNumber='" + strWizSerialNumber + "'");
               
                 // Create ManagementBaseObject and get the parameters to the Method "StoreAttributes"
-				ManagementBaseObject inParams = mgmtObject.GetMethodParameters("StoreAttributes");
+				ManagementBaseObject inParams = o.GetMethodParameters("StoreAttributes");
 
 				// Populate the parameter "attributeSettings" with the content of the clipboard
                 inParams["attributeSettings"] = strParameters; //Clipboard.GetDataObject().ToString(); // (string)Clipboard.GetDataObject().GetData(DataFormats.Text).ToString();
 
 				// Invoke the method "StoreAttributes" and retrieve the Result
-				ManagementBaseObject outparams = mgmtObject.InvokeMethod("StoreAttributes", inParams, null);
+				ManagementBaseObject outparams = o.InvokeMethod("StoreAttributes", inParams, null);
 
 				// Update Management Textbox				
-				UpdateManagementResults("\r\n\r\n" + "Cloning Done: " + strWizSerialNumber + " on Thread " + Thread.CurrentThread.Name );
-				UpdateManagementResults("\r\n" + "Return Value: " );
+				upDateMgmt("\r\n\r\n" + "Cloning Done: " + strWizSerialNumber + " on Thread " + Thread.CurrentThread.Name );
+				upDateMgmt("\r\n" + "Return Value: " );
 
 				// Display Return value
 				string strRet = outparams["ReturnValue"].ToString();
-				UpdateManagementResults(strRet);
+				upDateMgmt(strRet);
 				if (strRet.Equals("0"))         // ReturnValue=0 means the method invoked succesfully
 				{
+//					lblCloneStatus.ForeColor = Color.Blue;
+//					lblCloneStatus.Text = "Succeeded";
 				}
-				else
+				else                            // Method failed
 				{
+//					lblCloneStatus.ForeColor = Color.Red;
+//					lblCloneStatus.Text = "Failed";
 				}
 			}
-            catch (ManagementException ex)
+				// ManagementException Exception Handler
+				// Invoked if the Scanner is not connected to the system at the time command is executed.
+            catch (ManagementException err)
             {
-                MessageBox.Show("Error: " + ex.Message.ToString() + "\nCheck if the Scanner is still connected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error: " + err.Message.ToString() + "\nCheck if the Scanner is still connected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+//				lblCloneStatus.ForeColor = Color.Red;
+//				lblCloneStatus.Text = "Failed";
             }
-            catch (Exception ex)
+                // Generic Exception Handler
+            catch (Exception err)
             {
-                MessageBox.Show("Unknown Error: " + ex.Message.ToString());
+                MessageBox.Show("Unknown Error: " + err.Message.ToString());
+//				lblCloneStatus.ForeColor = Color.Red;
+//				lblCloneStatus.Text = "Failed";
             }
 		}
 
