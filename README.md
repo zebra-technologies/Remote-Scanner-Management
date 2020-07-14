@@ -1,4 +1,4 @@
-# Scanner SDK for Windows
+# Remote Scanner Management
 
 ## END USER LICENSE AGREEMENT
 #### (RESTRICTED SOFTWARE)
